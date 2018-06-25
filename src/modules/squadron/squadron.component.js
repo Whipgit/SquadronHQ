@@ -59,14 +59,14 @@ const SquadronDetails = ({ squadron }) => (
   </Card>
 )
 
-const Roster = ({ squadron, data }) => (
+const Roster = ({ squadron, data, isFullMember }) => (
   <React.Fragment>
     <ImageContainer>
       {data.cata({
         Empty: () => <LoaderComponent name={squadron.squadronId} />,
         Data: () => (
           <RosterContainer>
-            <RosterTable squadron={squadron} />
+            <RosterTable squadron={squadron} isFullMember={isFullMember} />
           </RosterContainer>
         ),
       })}
@@ -87,7 +87,7 @@ const RankSvg = ({ rank }) =>
     CAPT: () => <RankImage src={capt} />,
   })
 
-const RosterTable = ({ squadron }) => (
+const RosterTable = ({ squadron, isFullMember }) => (
   <React.Fragment>
     <Helmet>
       <meta charSet="utf-8" />
@@ -139,7 +139,9 @@ const RosterTable = ({ squadron }) => (
               <Flag name={pilot.countryCode} />
             </Table.Cell>
             <Table.Cell>
-              <Link to={`/pilot/${pilot.callsign}`}>{pilot.callsign}</Link>
+              <Link to={`/pilot/${pilot.callsign}`}>
+                {isFullMember ? `${pilot.firstName} "${pilot.callsign}" ${pilot.familyName}` : pilot.callsign}
+              </Link>
             </Table.Cell>
             <Table.Cell textAlign={'center'}>{pilot.qualificationLevel}</Table.Cell>
             <Table.Cell textAlign={'center'}>{pilot.leadStatus}</Table.Cell>
@@ -192,7 +194,9 @@ const RosterTable = ({ squadron }) => (
                   <Flag name={pilot.countryCode} />
                 </Table.Cell>
                 <Table.Cell>
-                  <Link to={`/pilot/${pilot.callsign}`}>{pilot.callsign}</Link>
+                  <Link to={`/pilot/${pilot.callsign}`}>
+                    {isFullMember ? `${pilot.firstName} "${pilot.callsign}" ${pilot.familyName}` : pilot.callsign}
+                  </Link>
                 </Table.Cell>
                 <Table.Cell textAlign={'center'}>{pilot.qualificationLevel}</Table.Cell>
                 <Table.Cell textAlign={'center'}>
@@ -271,6 +275,8 @@ export default connect(
     data: state.squadron.data,
     squadron: state.squadron.squadron,
     curSquadron: state.squadron.squadron.squadronId,
+    authenticated: state.user.authenticated,
+    isFullMember: state.user.isFullMember,
   }),
   {
     fetchSquadronData,

@@ -15,8 +15,10 @@ import {
 } from 'semantic-ui-react'
 import styled from 'styled-components'
 import { fetchLayoutData } from './main.redux'
+import { userLoginFromToken, logout } from '../modules/login/login.reducer'
 import { connect } from 'react-redux'
 import { compose, lifecycle } from 'recompose'
+import cookies from 'react-cookies'
 
 import bck1 from '../assets/bck1.jpg'
 import bck2 from '../assets/bck2.jpg'
@@ -41,7 +43,19 @@ const LoaderComponent = () => (
   </DimmerContainer>
 )
 
-const MainLayout = ({ children, layout, ...rest }) => {
+const MainLayout = ({
+  children,
+  layout,
+  authenticated,
+  callsign,
+  isFullMember,
+  isLSO,
+  isTrainee,
+  isAdmin,
+  isStaff,
+  logout,
+  ...rest
+}) => {
   return (
     <React.Fragment>
       <Background>
@@ -53,14 +67,13 @@ const MainLayout = ({ children, layout, ...rest }) => {
               </Menu.Item>
             </Link>
             <Menu.Item href={'http://vcvw-11.freeforums.net/'}>Forum</Menu.Item>
-            {layout.squadrons.map(squadron => {
+            {layout.squadrons.map((squadron, key) => {
               return (
-                <Menu.Item>
+                <Menu.Item key={key}>
                   <Link to={`/squadron/${squadron.fields.squadronId}`}>{squadron.fields.squadronId}</Link>
                 </Menu.Item>
               )
             })}
-
             <Dropdown item simple text="Air Wing Resources">
               <Dropdown.Menu>
                 <Dropdown.Item>List Item</Dropdown.Item>
@@ -78,9 +91,30 @@ const MainLayout = ({ children, layout, ...rest }) => {
                 <Dropdown.Item>List Item</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
-            <Menu.Item position={'right'}>
-              <Link to={`/login`}>Login</Link>
-            </Menu.Item>
+            {authenticated ? (
+              <Menu.Item position={'right'}>
+                <Dropdown text={callsign}>
+                  <Dropdown.Menu>
+                    <Dropdown.Item onClick={() => logout()}>Logout</Dropdown.Item>
+                    {isFullMember || isAdmin || isTrainee || isStaff ? <Dropdown.Item>Files / Mods</Dropdown.Item> : ''}
+                    {isAdmin || isStaff || isLSO ? (
+                      <React.Fragment>
+                        <Dropdown.Divider />
+                        <Dropdown.Header>Admin Section</Dropdown.Header>
+                        <Dropdown.Item>LSO Deck</Dropdown.Item>
+                        {isAdmin ? <Dropdown.Item>Manage Users</Dropdown.Item> : ''}
+                      </React.Fragment>
+                    ) : (
+                      ''
+                    )}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Menu.Item>
+            ) : (
+              <Menu.Item position={'right'}>
+                <Link to={`/login`}>Login</Link>
+              </Menu.Item>
+            )}
           </Container>
         </StyledMenu>
 
@@ -89,7 +123,7 @@ const MainLayout = ({ children, layout, ...rest }) => {
         </Container>
 
         <FooterContainer>
-          <Segment inverted vertical>
+          <StyledSegment vertical>
             <Container textAlign="center">
               <Image centered size="small" src={cvwLogo} />
               <List horizontal inverted divided link>
@@ -107,7 +141,7 @@ const MainLayout = ({ children, layout, ...rest }) => {
                 </List.Item>
               </List>
             </Container>
-          </Segment>
+          </StyledSegment>
         </FooterContainer>
       </Background>
     </React.Fragment>
@@ -127,9 +161,17 @@ const FooterContainer = styled.div`
   bottom: 0;
 `
 
+const StyledSegment = styled(Segment)`
+  background-color: #293949 !important;
+`
+
 const enhance = compose(
   lifecycle({
     componentDidMount() {
+      const uid = cookies.load('uid')
+      if (uid) {
+        this.props.userLoginFromToken(uid)
+      }
       if (this.props.layout.shortName !== 'CVW-11') {
         this.props.fetchLayoutData()
       }
@@ -172,9 +214,23 @@ const MainLayoutWrapper = ({ data, layout, ...rest }) => {
 
 const enhancedComponent = enhance(MainLayoutWrapper)
 
-const Connected = connect(state => ({ layout: state.layout.layout, data: state.layout.data }), {
-  fetchLayoutData,
-})(enhancedComponent)
+const Connected = connect(
+  state => ({
+    layout: state.layout.layout,
+    data: state.layout.data,
+    authenticated: state.user.authenticated,
+    callsign: state.user.callsign,
+    isLSO: state.user.isLSO,
+    isStaff: state.user.isStaff,
+    isAdmin: state.user.isAdmin,
+    isTrainee: state.user.callsign,
+  }),
+  {
+    fetchLayoutData,
+    userLoginFromToken,
+    logout,
+  }
+)(enhancedComponent)
 
 export default ({ component: Component, ...rest }) => {
   return (

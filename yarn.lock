@@ -1788,7 +1788,7 @@ cookie-signature@1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"
 
-cookie@0.3.1:
+cookie@0.3.1, cookie@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.3.1.tgz#e7e0a1f9ef43b4c8ba925c5c5a96e806d16873bb"
 
@@ -5787,6 +5787,13 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.1.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-cookies@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/react-cookies/-/react-cookies-0.1.0.tgz#6bb883f2d1a397f138a4110300b46fe25df8f1a9"
+  dependencies:
+    cookie "^0.3.1"
+    object-assign "^4.1.1"
+
 react-dev-utils@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-5.0.1.tgz#1f396e161fe44b595db1b186a40067289bf06613"
@@ -5843,6 +5850,14 @@ react-is@^16.3.1:
 react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
+
+react-redux-firebase@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/react-redux-firebase/-/react-redux-firebase-2.1.5.tgz#99d1929f309b3b47252baee7feb7eb054ad3c711"
+  dependencies:
+    hoist-non-react-statics "^2.3.1"
+    lodash "^4.17.10"
+    prop-types "^15.6.1"
 
 react-redux@5.0.7:
   version "5.0.7"
@@ -6049,6 +6064,13 @@ redux-actions@2.4.0:
     lodash "^4.13.1"
     lodash-es "^4.17.4"
     reduce-reducers "^0.1.0"
+
+redux-firestore@^0.5.7:
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/redux-firestore/-/redux-firestore-0.5.7.tgz#12595c61679bfeaa47d1ba0f4bfa87ea915dd80c"
+  dependencies:
+    lodash "^4.17.10"
+    prop-types "^15.6.1"
 
 redux-form@^7.4.2:
   version "7.4.2"

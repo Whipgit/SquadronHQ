@@ -16,6 +16,4 @@ const composeEnhancers =
 
 const enhancer = composeEnhancers(applyMiddleware(epicsMiddleware))
 
-
-
 export default createStore(rootReducer, enhancer)
