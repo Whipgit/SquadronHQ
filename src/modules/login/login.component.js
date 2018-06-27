@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Button, Form, Grid, Header, Message, Segment, Dimmer, Loader } from 'semantic-ui-react'
 import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -6,7 +7,7 @@ import { userLogin } from './login.reducer'
 import styled from 'styled-components'
 import { Field, reduxForm } from 'redux-form'
 
-const LoginForm = ({ userLogin, email, password, authenticated, loader }) => (
+const LoginForm = ({ userLogin, email, password, authenticated, loader, errMsg }) => (
   <div className="login-form">
     <div>{authenticated ? <Redirect to="/" push /> : ''}</div>
     <div>
@@ -19,16 +20,17 @@ const LoginForm = ({ userLogin, email, password, authenticated, loader }) => (
               Log-in to your account
             </Header>
             <Segment stacked>
+              {errMsg ? <Error>{errMsg}</Error> : ''}
               <Form onSubmit={() => userLogin({ email, password })}>
-                <Field component="input" type="email" name="email" placeholder={'email'} />
-                <Field component="input" type="password" name="password" placeholder={'password'} />
-                <Button color="teal" fluid size="large" type={'submit'}>
+                <StyledField component="input" type="email" name="email" placeholder={'email'} />
+                <StyledField component="input" type="password" name="password" placeholder={'password'} />
+                <Button fluid size="large" type={'submit'}>
                   Login
                 </Button>
               </Form>
             </Segment>
             <Message>
-              New to us? <a href="#">Sign Up</a>
+              New to us? <Link to={`/signup`}>Sign Up</Link>
             </Message>
           </Grid.Column>
         </Grid>
@@ -56,6 +58,7 @@ export default connect(
     password: state.form.login && state.form.login.values && state.form.login.values.password,
     authenticated: state.user.authenticated,
     loader: state.user.loader,
+    errMsg: state.user.error.message,
   }),
   {
     userLogin,
@@ -71,4 +74,13 @@ const DimmerContainer = styled.div`
   right: 0;
   bottom: 0;
   z-order; 2;
+`
+
+const Error = styled.p`
+  color: red;
+`
+
+const StyledField = styled(Field)`
+  margin-top: 5px !important;
+  margin-bottom: 10px !important;
 `

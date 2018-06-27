@@ -13,6 +13,7 @@ import Squadron from './modules/squadron/squadron.component'
 import Homepage from './modules/homepage/homepage.component'
 import Pilot from './modules/pilot/pilot.component'
 import Login from './modules/login/login.component'
+import Signup from './modules/signup/signup.component'
 
 const App = () => (
   <div className="App">
@@ -30,6 +31,7 @@ const App = () => (
         <MainLayout path="/squadron/:squadronId" component={Squadron} />
         <MainLayout path="/pilot/:callsign" component={Pilot} />
         <MainLayout path="/login" component={Login} />
+        <MainLayout path="/signup" component={Signup} />
         <Route component={() => <div>404</div>} />
       </Switch>
     </div>

@@ -74,23 +74,6 @@ const MainLayout = ({
                 </Menu.Item>
               )
             })}
-            <Dropdown item simple text="Air Wing Resources">
-              <Dropdown.Menu>
-                <Dropdown.Item>List Item</Dropdown.Item>
-                <Dropdown.Item>List Item</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Header>Header Item</Dropdown.Header>
-                <Dropdown.Item>
-                  <i className="dropdown icon" />
-                  <span className="text">Submenu</span>
-                  <Dropdown.Menu>
-                    <Dropdown.Item>List Item</Dropdown.Item>
-                    <Dropdown.Item>List Item</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown.Item>
-                <Dropdown.Item>List Item</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
             {authenticated ? (
               <Menu.Item position={'right'}>
                 <Dropdown text={callsign}>
@@ -223,7 +206,7 @@ const Connected = connect(
     isLSO: state.user.isLSO,
     isStaff: state.user.isStaff,
     isAdmin: state.user.isAdmin,
-    isTrainee: state.user.callsign,
+    isTrainee: state.user.isTrainee,
   }),
   {
     fetchLayoutData,

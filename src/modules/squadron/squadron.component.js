@@ -142,6 +142,20 @@ const RosterTable = ({ squadron, isFullMember }) => (
               <Link to={`/pilot/${pilot.callsign}`}>
                 {isFullMember ? `${pilot.firstName} "${pilot.callsign}" ${pilot.familyName}` : pilot.callsign}
               </Link>
+              {key === 0 ? (
+                <SubRank>
+                  <br />Commanding Officer
+                </SubRank>
+              ) : (
+                ''
+              )}
+              {key === 1 ? (
+                <SubRank>
+                  <br />Executive Officer
+                </SubRank>
+              ) : (
+                ''
+              )}
             </Table.Cell>
             <Table.Cell textAlign={'center'}>{pilot.qualificationLevel}</Table.Cell>
             <Table.Cell textAlign={'center'}>{pilot.leadStatus}</Table.Cell>
@@ -247,6 +261,13 @@ const GridContainer = styled.div`
 const ImageWrapper = styled.div`
   width: 100%:
   text-align: right;
+`
+
+const SubRank = styled.p`
+  font-size: 10px;
+  margin: 0 !important;
+  padding: 0 !important;
+  margin-top: -15px !important;
 `
 
 const SquadronLogo = styled.img`

@@ -12,7 +12,11 @@ firebase.initializeApp({
   messagingSenderId: '284812449480',
 })
 
+const settings = { /* your settings... */ timestampsInSnapshots: true }
+
 const db = firebase.firestore()
+
+db.settings(settings)
 
 export const auth = firebase.auth()
 export const users = db.collection('users')

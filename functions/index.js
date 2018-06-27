@@ -140,6 +140,7 @@ exports.airwing = functions.https.onRequest((req, res) => {
   res.set('Access-Control-Allow-Methods', 'GET')
   client.getEntries({ content_type: 'organization', 'fields.shortName': 'CVW-11' }).then(response => {
     let data = response.items[0].fields
+    data.squadrons = sort((a, b) => a.fields.index - b.fields.index, data.squadrons)
     data.squadrons.map(item => {
       delete item.sys
       return item.fields

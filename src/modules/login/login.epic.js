@@ -21,10 +21,7 @@ export const userLogin = action$ =>
   action$.ofType(types.userLogin).switchMap(action =>
     login(action.payload)
       .then(user => userLoginSuccess(user))
-      .catch(err => {
-        debugger
-        return userLoginError(err)
-      })
+      .catch(err => userLoginError(err))
   )
 
 const loginFromToken = token =>
@@ -37,15 +34,13 @@ export const userLoginFromToken = action$ =>
   action$.ofType(types.userLoginFromToken).switchMap(action =>
     loginFromToken(action.payload)
       .then(user => userLoginSuccess(user))
-      .catch(err => {
-        debugger
-        return userLoginError(err)
-      })
+      .catch(err => userLoginError(err))
   )
 
 export const logout = action$ =>
   action$.ofType(types.logout).switchMap(action =>
     Promise.resolve().then(() => {
       cookies.remove('uid')
+      return { type: 'Nothing' }
     })
   )
