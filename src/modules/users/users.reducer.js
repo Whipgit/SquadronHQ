@@ -1,5 +1,6 @@
 import { createAction, handleActions } from 'redux-actions'
 import daggy from 'daggy'
+import { sort } from 'ramda'
 
 const UsersData = daggy.taggedSum('UsersData', {
   Empty: [],
@@ -33,7 +34,11 @@ export default handleActions(
     [types.fetchUsersDataSuccess]: (state, { payload }) => {
       return {
         ...state,
-        users: payload,
+        users: sort((a, b) => {
+          if (a.callsign < b.callsign) return -1
+          if (a.callsign > b.callsign) return 1
+          return 0
+        }, payload),
         data: UsersData.Data,
       }
     },
