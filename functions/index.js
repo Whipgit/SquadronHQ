@@ -124,10 +124,10 @@ exports.pilot = functions.https.onRequest((req, res) => {
           if (event.fields.category === 'C-CAT') trainingEvents.c.push(event.fields)
           if (event.fields.category === 'D-CAT') trainingEvents.d.push(event.fields)
         })
-      sort(diffTraining, trainingEvents.a)
-      sort(diffTraining, trainingEvents.b)
-      sort(diffTraining, trainingEvents.c)
-      sort(diffTraining, trainingEvents.d)
+      trainingEvents.a = sort(diffTraining, trainingEvents.a)
+      trainingEvents.b = sort(diffTraining, trainingEvents.b)
+      trainingEvents.c = sort(diffTraining, trainingEvents.c)
+      trainingEvents.d = sort(diffTraining, trainingEvents.d)
       delete pilot.training
       pilot.training = trainingEvents
       res.send(pilot)
@@ -148,42 +148,3 @@ exports.airwing = functions.https.onRequest((req, res) => {
     res.send(data)
   })
 })
-
-let pilot = {}
-let trainingEvents = {
-  a: [],
-  b: [],
-  c: [],
-  d: [],
-}
-client
-  .getEntries({ content_type: 'pilots', 'fields.callsign': 'Babs' })
-  .then(response => {
-    pilot = (response && response.items && response.items[0] && response.items[0].fields) || 'error'
-    return client.getEntries({ content_type: 'trainingEvents' })
-  })
-  .then(allTraining => {
-    allTraining.items
-      .map(event => {
-        if (pilot.training && pilot.training.filter(item => item.fields.code === event.fields.code).length > 0) {
-          event.fields.earned = true
-        } else {
-          event.fields.earned = false
-        }
-        delete event.fields.trainingGuidelines
-        return event
-      })
-      .map(event => {
-        if (event.fields.category === 'A-CAT') trainingEvents.a.push(event.fields)
-        if (event.fields.category === 'B-CAT') trainingEvents.b.push(event.fields)
-        if (event.fields.category === 'C-CAT') trainingEvents.c.push(event.fields)
-        if (event.fields.category === 'D-CAT') trainingEvents.d.push(event.fields)
-      })
-    diffTraining.a = sort(diffTraining, trainingEvents.a)
-    diffTraining.b = sort(diffTraining, trainingEvents.b)
-    diffTraining.c = sort(diffTraining, trainingEvents.c)
-    diffTraining.d = sort(diffTraining, trainingEvents.d)
-    delete pilot.training
-    pilot.training = trainingEvents
-    res.send(pilot)
-  })

@@ -10,12 +10,20 @@ const getUsers = () => {
   })
 }
 
+const saveUser = ({ user, field, val }) => {
+  const userToSave = { ...user }
+  userToSave[field] = val
+  return users.doc(user.uid).set(userToSave)
+}
+
 export const fetchUsersData = action$ =>
   action$
     .ofType(types.fetchUsersData)
     .switchMap(action => getUsers(action.payload).then(users => fetchUsersDataSuccess(users)))
 
 export const saveUserPermissions = action$ =>
-  action$
-    .ofType(types.fetchUsersData)
-    .switchMap(action => getUsers(action.payload).then(users => fetchUsersDataSuccess(users)))
+  action$.ofType(types.saveUserPermissions).switchMap(action =>
+    saveUser(action.payload).then(res => {
+      return { type: 'NOTHING' }
+    })
+  )

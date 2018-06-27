@@ -88,7 +88,7 @@ const MainLayout = ({
                         {isAdmin ? (
                           <Link to={`/users`}>
                             {' '}
-                            <Dropdown.Item>Manage Users</Dropdown.Item>
+                            <Dropdown.Item style={{color: '#000'}}>Manage Users</Dropdown.Item>
                           </Link>
                         ) : (
                           ''

@@ -8,16 +8,12 @@ import styled from 'styled-components'
 
 import { fetchUsersData, saveUserPermissions } from './users.reducer'
 
-const Users = ({ users, data }) => {
-  return (
-    <PilotContainer>
+const Users = ({ users, data, saveUserPermissions }) => {
+  return <PilotContainer>
       <Helmet>
         <title>Squadron HQ - Manage Users</title>
       </Helmet>
-      {data.cata({
-        Empty: () => <LoaderComponent />,
-        Data: () => (
-          <InnerContainer>
+      {data.cata({ Empty: () => <LoaderComponent />, Data: () => <InnerContainer>
             <Table compact>
               <Table.Header>
                 <Table.Row>
@@ -32,9 +28,7 @@ const Users = ({ users, data }) => {
               </Table.Header>
 
               <Table.Body>
-                {users
-                  ? users.map((user, key) => (
-                      <Table.Row key={key}>
+                {users ? users.map((user, key) => <Table.Row key={key}>
                         <Table.Cell>
                           {user.callsign}
                           <br />
@@ -42,45 +36,45 @@ const Users = ({ users, data }) => {
                         </Table.Cell>
                         <Table.Cell>{user.email}</Table.Cell>
                         <Table.Cell>
-                          <Checkbox
-                            checked={user.isTrainee}
-                            onChange={() => saveUserPermissions(user, 'isTrainee', arguments)}
-                          />
+                          <Checkbox checked={user.isTrainee} onChange={() => saveUserPermissions({
+                                user,
+                                field: 'isTrainee',
+                                val: !user.isTrainee,
+                              })} />
                         </Table.Cell>
                         <Table.Cell>
-                          <Checkbox
-                            checked={user.isFullMember}
-                            onChange={() => saveUserPermissions(user, 'isFullMember', arguments)}
-                          />
+                          <Checkbox checked={user.isFullMember} onChange={() => saveUserPermissions({
+                                user,
+                                field: 'isFullMember',
+                                val: !user.isFullMember,
+                              })} />
                         </Table.Cell>
                         <Table.Cell>
-                          <Checkbox
-                            checked={user.isLSO}
-                            onChange={() => saveUserPermissions(user, 'isLSO', arguments)}
-                          />
+                          <Checkbox checked={user.isLSO} onChange={() => saveUserPermissions({
+                                user,
+                                field: 'isLSO',
+                                val: !user.isLSO,
+                              })} />
                         </Table.Cell>
                         <Table.Cell>
-                          <Checkbox
-                            checked={user.isStaff}
-                            onChange={() => saveUserPermissions(user, 'isStaff', arguments)}
-                          />
+                          <Checkbox checked={user.isStaff} onChange={() => saveUserPermissions({
+                                user,
+                                field: 'isStaff',
+                                val: !user.isStaff,
+                              })} />
                         </Table.Cell>
                         <Table.Cell>
-                          <Checkbox
-                            checked={user.isAdmin}
-                            onChange={() => saveUserPermissions(user, 'isAdmin', arguments)}
-                          />
+                          <Checkbox checked={user.isAdmin} onChange={() => saveUserPermissions({
+                                user,
+                                field: 'isAdmin',
+                                val: !user.isAdmin,
+                              })} />
                         </Table.Cell>
-                      </Table.Row>
-                    ))
-                  : ''}
+                      </Table.Row>) : ''}
               </Table.Body>
             </Table>
-          </InnerContainer>
-        ),
-      })}
+          </InnerContainer> })}
     </PilotContainer>
-  )
 }
 
 const PilotContainer = styled.div``

@@ -37,6 +37,17 @@ export default handleActions(
         data: UsersData.Data,
       }
     },
+    [types.saveUserPermissions]: (state, { payload: { user, field, val } }) => {
+      return {
+        ...state,
+        users: state.users.map(account => {
+          if (account.email === user.email) {
+            account[field] = val
+          }
+          return account
+        }),
+      }
+    },
   },
   INITIAL_STATE
 )
