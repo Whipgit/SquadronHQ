@@ -85,6 +85,12 @@ const RankSvg = ({ rank }) =>
     LCDR: () => <RankImage src={lcdr} />,
     CDR: () => <RankImage src={cdr} />,
     CAPT: () => <RankImage src={capt} />,
+    MENS: () => <RankImage src={ens} />,
+    MLTJG: () => <RankImage src={ltjg} />,
+    MLT: () => <RankImage src={lt} />,
+    MLCDR: () => <RankImage src={lcdr} />,
+    MCDR: () => <RankImage src={cdr} />,
+    MCAPT: () => <RankImage src={capt} />,
   })
 
 const RosterTable = ({ squadron, isFullMember }) => (
@@ -142,14 +148,14 @@ const RosterTable = ({ squadron, isFullMember }) => (
               <Link to={`/pilot/${pilot.callsign}`}>
                 {isFullMember ? `${pilot.firstName} "${pilot.callsign}" ${pilot.familyName}` : pilot.callsign}
               </Link>
-              {key === 0 ? (
+              {pilot.specialRole === 'C.O.' ? (
                 <SubRank>
                   <br />Commanding Officer
                 </SubRank>
               ) : (
                 ''
               )}
-              {key === 1 ? (
+              {pilot.specialRole === 'X.O.' ? (
                 <SubRank>
                   <br />Executive Officer
                 </SubRank>
@@ -284,6 +290,11 @@ const enhance = compose(
     componentDidMount() {
       if (this.props.curSquadron !== this.props.match.params.squadronId) {
         this.props.fetchSquadronData(this.props.match.params.squadronId)
+      }
+    },
+    componentWillReceiveProps(nextProps) {
+      if (this.props.curSquadron !== nextProps.match.params.squadronId) {
+        this.props.fetchSquadronData(nextProps.match.params.squadronId)
       }
     },
   })

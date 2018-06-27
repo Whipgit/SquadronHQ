@@ -5,6 +5,7 @@ import squadron from '../modules/squadron/squadron.reducer'
 import pilot from '../modules/pilot/pilot.reducer'
 import user from '../modules/login/login.reducer'
 import signup from '../modules/signup/signup.reducer'
+import users from '../modules/users/users.reducer'
 
 export default combineReducers({
   layout,
@@ -12,5 +13,6 @@ export default combineReducers({
   pilot,
   user,
   signup,
+  users,
   form: formReducer,
 })

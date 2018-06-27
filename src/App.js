@@ -14,6 +14,7 @@ import Homepage from './modules/homepage/homepage.component'
 import Pilot from './modules/pilot/pilot.component'
 import Login from './modules/login/login.component'
 import Signup from './modules/signup/signup.component'
+import Users from './modules/users/users.component'
 
 const App = () => (
   <div className="App">
@@ -32,6 +33,7 @@ const App = () => (
         <MainLayout path="/pilot/:callsign" component={Pilot} />
         <MainLayout path="/login" component={Login} />
         <MainLayout path="/signup" component={Signup} />
+        <MainLayout path="/users" component={Users} />
         <Route component={() => <div>404</div>} />
       </Switch>
     </div>

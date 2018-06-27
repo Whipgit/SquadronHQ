@@ -85,7 +85,14 @@ const MainLayout = ({
                         <Dropdown.Divider />
                         <Dropdown.Header>Admin Section</Dropdown.Header>
                         <Dropdown.Item>LSO Deck</Dropdown.Item>
-                        {isAdmin ? <Dropdown.Item>Manage Users</Dropdown.Item> : ''}
+                        {isAdmin ? (
+                          <Link to={`/users`}>
+                            {' '}
+                            <Dropdown.Item>Manage Users</Dropdown.Item>
+                          </Link>
+                        ) : (
+                          ''
+                        )}
                       </React.Fragment>
                     ) : (
                       ''

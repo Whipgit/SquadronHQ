@@ -15,6 +15,12 @@ const Rank = daggy.taggedSum('Rank', {
   LCDR: [],
   CDR: [],
   CAPT: [],
+  MENS: [],
+  MLTJG: [],
+  MLT: [],
+  MLCDR: [],
+  MCDR: [],
+  MCAPT: [],
 })
 
 const LSO = daggy.taggedSum('LSO', {
@@ -25,7 +31,7 @@ const LSO = daggy.taggedSum('LSO', {
 const rankSwitch = rank => {
   switch (rank) {
     case 'Ensign':
-      return Rank.Ensign
+      return Rank.ENS
     case 'Lieutenant Junior Grade':
       return Rank.LTJG
     case 'Lieutenant':
@@ -36,6 +42,18 @@ const rankSwitch = rank => {
       return Rank.CDR
     case 'Captain':
       return Rank.CAPT
+    case 'USMC - Second Lieutenant':
+      return Rank.MENS
+    case 'USMC - First Lieutenant':
+      return Rank.MLTJG
+    case 'USMC - Captain':
+      return Rank.MLT
+    case 'USMC - Major':
+      return Rank.MLCDR
+    case 'USMC - Lieutenant Colonel':
+      return Rank.MCDR
+    case 'USMC - Colonel':
+      return Rank.MCAPT
     default:
       return Rank.Empty
   }
