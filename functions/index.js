@@ -57,35 +57,46 @@ exports.squadron = functions.https.onRequest((req, res) => {
   res.set('Access-Control-Allow-Methods', 'GET')
   return client.getEntries({ content_type: 'squadrons', 'fields.squadronId': req.query.squadronId }).then(response =>
     res.send(
-      response.items.map(({ fields, sys }) => ({
-        id: sys.id,
-        squadronId: fields.squadronId,
-        callsign: fields.callsign,
-        nickname: fields.nickname,
-        branch: fields.branch,
-        squadronLogo: fields.squadronLogo.fields,
-        airframes: fields.airframes,
-        activePilots: sort(
-          diff,
-          fields.pilots
-            .map(({ fields, sys }) => {
-              delete fields.training
-              fields.id = sys.id
-              return fields
-            })
-            .filter(pilot => pilot.active)
-        ),
-        inactivePilots: sort(
-          diff,
-          fields.pilots
-            .map(({ fields, sys }) => {
-              delete fields.training
-              fields.id = sys.id
-              return fields
-            })
-            .filter(pilot => !pilot.active)
-        ),
-      }))[0]
+      response.items.map(({ fields, sys }) => {
+        let returnObject = {
+          id: sys.id,
+          squadronId: fields.squadronId,
+          callsign: fields.callsign,
+          nickname: fields.nickname,
+          branch: fields.branch,
+          squadronLogo: fields.squadronLogo.fields,
+          airframes: fields.airframes,
+        }
+        returnObject.activePilots =
+          fields.pilots && fields.pilots.length
+            ? sort(
+                diff,
+                fields.pilots
+                  .map(({ fields, sys }) => {
+                    delete fields.training
+                    delete fields.staffComments
+                    fields.id = sys.id
+                    return fields
+                  })
+                  .filter(pilot => pilot.active)
+              )
+            : []
+        returnObject.inactivePilots =
+          fields.pilots && fields.pilots.length
+            ? sort(
+                diff,
+                fields.pilots
+                  .map(({ fields, sys }) => {
+                    delete fields.training
+                    delete fields.staffComments
+                    fields.id = sys.id
+                    return fields
+                  })
+                  .filter(pilot => !pilot.active)
+              )
+            : []
+        return returnObject
+      })[0]
     )
   )
 })

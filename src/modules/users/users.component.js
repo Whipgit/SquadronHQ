@@ -5,76 +5,115 @@ import { compose, lifecycle } from 'recompose'
 import { Table, Checkbox } from 'semantic-ui-react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import styled from 'styled-components'
+import Auth from './Auth'
 
 import { fetchUsersData, saveUserPermissions } from './users.reducer'
 
 const Users = ({ users, data, saveUserPermissions }) => {
-  return <PilotContainer>
-      <Helmet>
-        <title>Squadron HQ - Manage Users</title>
-      </Helmet>
-      {data.cata({ Empty: () => <LoaderComponent />, Data: () => <InnerContainer>
-            <Table compact>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Callsign</Table.HeaderCell>
-                  <Table.HeaderCell>Email</Table.HeaderCell>
-                  <Table.HeaderCell>Trainee</Table.HeaderCell>
-                  <Table.HeaderCell>Pilot</Table.HeaderCell>
-                  <Table.HeaderCell>LSO</Table.HeaderCell>
-                  <Table.HeaderCell>Staff</Table.HeaderCell>
-                  <Table.HeaderCell>Admin</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
+  return (
+    <Auth>
+      <PilotContainer>
+        <Helmet>
+          <title>Squadron HQ - Manage Users</title>
+        </Helmet>
+        {data.cata({
+          Empty: () => <LoaderComponent />,
+          Data: () => (
+            <InnerContainer>
+              <Table compact>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Callsign</Table.HeaderCell>
+                    <Table.HeaderCell>Email</Table.HeaderCell>
+                    <Table.HeaderCell>Trainee</Table.HeaderCell>
+                    <Table.HeaderCell>Pilot</Table.HeaderCell>
+                    <Table.HeaderCell>LSO</Table.HeaderCell>
+                    <Table.HeaderCell>Staff</Table.HeaderCell>
+                    <Table.HeaderCell>Admin</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
 
-              <Table.Body>
-                {users ? users.map((user, key) => <Table.Row key={key}>
-                        <Table.Cell>
-                          {user.callsign}
-                          <br />
-                          <Uid>{user.uid}</Uid>
-                        </Table.Cell>
-                        <Table.Cell>{user.email}</Table.Cell>
-                        <Table.Cell>
-                          <Checkbox checked={user.isTrainee} onChange={() => saveUserPermissions({
-                                user,
-                                field: 'isTrainee',
-                                val: !user.isTrainee,
-                              })} />
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Checkbox checked={user.isFullMember} onChange={() => saveUserPermissions({
-                                user,
-                                field: 'isFullMember',
-                                val: !user.isFullMember,
-                              })} />
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Checkbox checked={user.isLSO} onChange={() => saveUserPermissions({
-                                user,
-                                field: 'isLSO',
-                                val: !user.isLSO,
-                              })} />
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Checkbox checked={user.isStaff} onChange={() => saveUserPermissions({
-                                user,
-                                field: 'isStaff',
-                                val: !user.isStaff,
-                              })} />
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Checkbox checked={user.isAdmin} onChange={() => saveUserPermissions({
-                                user,
-                                field: 'isAdmin',
-                                val: !user.isAdmin,
-                              })} />
-                        </Table.Cell>
-                      </Table.Row>) : ''}
-              </Table.Body>
-            </Table>
-          </InnerContainer> })}
-    </PilotContainer>
+                <Table.Body>
+                  {users
+                    ? users.map((user, key) => (
+                        <Table.Row key={key}>
+                          <Table.Cell>
+                            {user.callsign}
+                            <br />
+                            <Uid>{user.uid}</Uid>
+                          </Table.Cell>
+                          <Table.Cell>{user.email}</Table.Cell>
+                          <Table.Cell>
+                            <Checkbox
+                              checked={user.isTrainee}
+                              onChange={() =>
+                                saveUserPermissions({
+                                  user,
+                                  field: 'isTrainee',
+                                  val: !user.isTrainee,
+                                })
+                              }
+                            />
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Checkbox
+                              checked={user.isFullMember}
+                              onChange={() =>
+                                saveUserPermissions({
+                                  user,
+                                  field: 'isFullMember',
+                                  val: !user.isFullMember,
+                                })
+                              }
+                            />
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Checkbox
+                              checked={user.isLSO}
+                              onChange={() =>
+                                saveUserPermissions({
+                                  user,
+                                  field: 'isLSO',
+                                  val: !user.isLSO,
+                                })
+                              }
+                            />
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Checkbox
+                              checked={user.isStaff}
+                              onChange={() =>
+                                saveUserPermissions({
+                                  user,
+                                  field: 'isStaff',
+                                  val: !user.isStaff,
+                                })
+                              }
+                            />
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Checkbox
+                              checked={user.isAdmin}
+                              onChange={() =>
+                                saveUserPermissions({
+                                  user,
+                                  field: 'isAdmin',
+                                  val: !user.isAdmin,
+                                })
+                              }
+                            />
+                          </Table.Cell>
+                        </Table.Row>
+                      ))
+                    : ''}
+                </Table.Body>
+              </Table>
+            </InnerContainer>
+          ),
+        })}
+      </PilotContainer>
+    </Auth>
+  )
 }
 
 const PilotContainer = styled.div``
