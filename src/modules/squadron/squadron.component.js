@@ -54,7 +54,7 @@ const SquadronDetails = ({ squadron }) => (
     </Card.Content>
     <Card.Content extra>
       <Icon name={'user'} />
-      {squadron.activePilots.length} Pilots
+      {squadron.activePilots.length}/14 Pilots
     </Card.Content>
   </Card>
 )

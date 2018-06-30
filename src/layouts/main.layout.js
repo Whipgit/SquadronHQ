@@ -38,7 +38,7 @@ const randomImage = () => {
 const LoaderComponent = () => (
   <DimmerContainer>
     <Dimmer active inverted>
-      <Loader>Loading Squadron HQ</Loader>
+      <Loader>Loading SquadronHQ</Loader>
     </Dimmer>
   </DimmerContainer>
 )
@@ -84,11 +84,18 @@ const MainLayout = ({
                       <React.Fragment>
                         <Dropdown.Divider />
                         <Dropdown.Header>Admin Section</Dropdown.Header>
-                        <Dropdown.Item>LSO Deck</Dropdown.Item>
+                        {isLSO ? (
+                          <Link to={`/lso`}>
+                            {' '}
+                            <Dropdown.Item style={{ color: '#000' }}>LSO Platform</Dropdown.Item>
+                          </Link>
+                        ) : (
+                          ''
+                        )}
                         {isAdmin ? (
                           <Link to={`/users`}>
                             {' '}
-                            <Dropdown.Item style={{color: '#000'}}>Manage Users</Dropdown.Item>
+                            <Dropdown.Item style={{ color: '#000' }}>Manage Users</Dropdown.Item>
                           </Link>
                         ) : (
                           ''
