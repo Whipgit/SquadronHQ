@@ -13,8 +13,6 @@ const client = contentful.createClient({
   accessToken: process.env.ACCESS_TOKEN,
 })
 
-const roundHundred = value => Math.round(value / 100) * 100
-
 firebase.initializeApp({
   apiKey: 'AIzaSyCInHalJx95WGWPn9oDM4hTIudZHkKiuQI',
   authDomain: 'squadronhq-b1fdd.firebaseapp.com',
@@ -51,8 +49,8 @@ exports.pilotList = functions.https.onRequest((req, res) => {
   return client.getEntries({ content_type: 'pilots', 'fields.active': true }).then(allPilots =>
     res.send(
       allPilots.items.map(item => ({
-        search: `${item.fields.modex} - ${item.fields.firstName} - ${item.fields.callsign} - ${item.fields.familyName}`,
-        callsign: item.fields.callsign,
+        title: `${item.fields.modex} - ${item.fields.firstName} - ${item.fields.callsign} - ${item.fields.familyName}`,
+        description: item.fields.callsign,
         modex: item.fields.modex,
         id: item.sys.id,
       }))
@@ -167,4 +165,13 @@ exports.airwing = functions.https.onRequest((req, res) => {
     })
     res.send(data)
   })
+})
+
+exports.training = functions.https.onRequest((req, res) => {
+  res.set('Access-Control-Allow-Origin', req.get('Origin'))
+  res.set('Access-Control-Allow-Credentials', true)
+  res.set('Access-Control-Allow-Methods', 'GET')
+  client
+    .getEntries({ content_type: 'trainingEvents', 'fields.code': req.query.code || 'FAM-2101' })
+    .then(response => res.send(response.items[0]))
 })

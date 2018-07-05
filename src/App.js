@@ -16,7 +16,7 @@ import Login from './modules/login/login.component'
 import Signup from './modules/signup/signup.component'
 import Users from './modules/users/users.component'
 import LSO from './modules/lso/lso.component'
-
+import Training from './modules/training/training.component'
 
 const App = () => (
   <div className="App">
@@ -33,6 +33,7 @@ const App = () => (
         </Route>
         <MainLayout path="/squadron/:squadronId" component={Squadron} />
         <MainLayout path="/pilot/:callsign" component={Pilot} />
+        <MainLayout path="/training/:code" component={Training} />
         <MainLayout path="/login" component={Login} />
         <MainLayout path="/signup" component={Signup} />
         <MainLayout path="/users" component={Users} />

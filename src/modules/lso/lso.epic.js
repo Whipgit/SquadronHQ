@@ -1,14 +1,15 @@
 import '../../rxjs-operators'
-import { types, fetchUsersDataSuccess } from './lso.reducer'
+import { types, fetchPilotsListSuccess } from './lso.reducer'
 import { users } from '../../firebase.js'
+import axios from 'axios/index'
 
-const getPilotsList = () => {
-  return users.get().then(users => {
-    const usersArray = []
-    users.forEach(user => usersArray.push(user.data()))
-    return usersArray
+const getPilotsList = () =>
+  axios({
+    method: 'get',
+    url: 'https://us-central1-squadronhq-b1fdd.cloudfunctions.net/pilotList',
+  }).then(item => {
+    return item
   })
-}
 
 const saveUser = ({ user, field, val }) => {
   const userToSave = { ...user }
@@ -16,10 +17,10 @@ const saveUser = ({ user, field, val }) => {
   return users.doc(user.uid).set(userToSave)
 }
 
-export const fetchUsersData = action$ =>
+export const fetchPilotsList = action$ =>
   action$
-    .ofType(types.fetchUsersData)
-    .switchMap(action => getUsers(action.payload).then(users => fetchUsersDataSuccess(users)))
+    .ofType(types.fetchPilotsList)
+    .switchMap(action => getPilotsList(action.payload).then(users => fetchPilotsListSuccess(users.data)))
 
 export const saveUserPermissions = action$ =>
   action$.ofType(types.saveUserPermissions).switchMap(action =>

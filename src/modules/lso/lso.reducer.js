@@ -1,6 +1,7 @@
 import { createAction, handleActions } from 'redux-actions'
 import daggy from 'daggy'
 import { sort } from 'ramda'
+import { escapeRegExp, filter } from 'lodash'
 
 const UsersData = daggy.taggedSum('UsersData', {
   Empty: [],
@@ -9,37 +10,73 @@ const UsersData = daggy.taggedSum('UsersData', {
 })
 
 export const types = {
-  fetchUsersData: 'FETCH_USERS_DATA',
-  fetchUsersDataSuccess: 'FETCH_USERS_DATA_SUCCESS',
+  fetchPilotsList: 'FETCH_PILOTS_LIST',
+  fetchPilotsListSuccess: 'FETCH_PILOTS_LIST_SUCCESS',
+  trimPilot: 'TRIM_PILOT_SEARCH',
+  resetPilot: 'RESET_PILOT_SEARCH',
+  trimLso: 'TRIM_LSO_SEARCH',
+  resetLso: 'RESET_LSO_SEARCH',
   saveUserPermissions: 'SAVE_USER_PERMISSIONS',
 }
 
-export const fetchUsersData = createAction(types.fetchUsersData)
-export const fetchUsersDataSuccess = createAction(types.fetchUsersDataSuccess)
+export const fetchPilotsList = createAction(types.fetchPilotsList)
+export const fetchPilotsListSuccess = createAction(types.fetchPilotsListSuccess)
+export const trimPilot = createAction(types.trimPilot)
+export const resetPilot = createAction(types.resetPilot)
+export const trimLso = createAction(types.trimLso)
+export const resetLso = createAction(types.resetLso)
 export const saveUserPermissions = createAction(types.saveUserPermissions)
 
 export const INITIAL_STATE = {
   data: UsersData.Empty,
-  users: [],
+  pilotList: [],
+  pilot: [],
+  lso: [],
 }
 
 export default handleActions(
   {
-    [types.fetchUsersData]: (state, { payload }) => {
+    [types.fetchPilotsList]: (state, { payload }) => {
       return {
         ...state,
         data: UsersData.Empty,
       }
     },
-    [types.fetchUsersDataSuccess]: (state, { payload }) => {
+    [types.fetchPilotsListSuccess]: (state, { payload }) => {
       return {
         ...state,
-        users: sort((a, b) => {
-          if (a.callsign < b.callsign) return -1
-          if (a.callsign > b.callsign) return 1
-          return 0
-        }, payload),
+        pilotList: [...payload],
+        pilot: [...payload],
+        lso: [...payload],
         data: UsersData.Data,
+      }
+    },
+    [types.trimPilot]: (state, { payload }) => {
+      const re = new RegExp(escapeRegExp(payload), 'i')
+      const isMatch = result => re.test(result.title)
+      return {
+        ...state,
+        pilot: [...state.pilotList.filter(isMatch)],
+      }
+    },
+    [types.resetPilot]: (state, { payload }) => {
+      return {
+        ...state,
+        pilot: [...state.pilotList],
+      }
+    },
+    [types.trimLso]: (state, { payload }) => {
+      const re = new RegExp(escapeRegExp(payload), 'i')
+      const isMatch = result => re.test(result.title)
+      return {
+        ...state,
+        lso: [...state.pilotList.filter(isMatch)],
+      }
+    },
+    [types.resetLso]: (state, { payload }) => {
+      return {
+        ...state,
+        lso: [...state.pilotList],
       }
     },
     [types.saveUserPermissions]: (state, { payload: { user, field, val } }) => {

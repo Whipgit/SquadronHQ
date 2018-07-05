@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
 import { compose, lifecycle } from 'recompose'
@@ -71,7 +72,9 @@ const Pilot = ({
                     <Table.Cell width={2} textAlign={'center'}>
                       {item.code}
                     </Table.Cell>
-                    <Table.Cell width={4}>{item.title}</Table.Cell>
+                    <Table.Cell width={4}>
+                      <Link to={`/training/${item.code}`}>{item.title}</Link>
+                    </Table.Cell>
                     <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
                     <Table.Cell width={1} textAlign={'center'}>
                       {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
@@ -92,7 +95,9 @@ const Pilot = ({
                     <Table.Cell width={2} textAlign={'center'}>
                       {item.code}
                     </Table.Cell>
-                    <Table.Cell width={4}>{item.title}</Table.Cell>
+                    <Table.Cell width={4}>
+                      <Link to={`/training/${item.code}`}>{item.title}</Link>
+                    </Table.Cell>
                     <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
                     <Table.Cell width={1} textAlign={'center'}>
                       {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
@@ -113,7 +118,9 @@ const Pilot = ({
                     <Table.Cell width={2} textAlign={'center'}>
                       {item.code}
                     </Table.Cell>
-                    <Table.Cell width={4}>{item.title}</Table.Cell>
+                    <Table.Cell width={4}>
+                      <Link to={`/training/${item.code}`}>{item.title}</Link>
+                    </Table.Cell>
                     <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
                     <Table.Cell width={1} textAlign={'center'}>
                       {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
@@ -134,7 +141,9 @@ const Pilot = ({
                     <Table.Cell width={2} textAlign={'center'}>
                       {item.code}
                     </Table.Cell>
-                    <Table.Cell width={4}>{item.title}</Table.Cell>
+                    <Table.Cell width={4}>
+                      <Link to={`/training/${item.code}`}>{item.title}</Link>
+                    </Table.Cell>
                     <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
                     <Table.Cell width={1} textAlign={'center'}>
                       {item.earned ? <Icon name={'check'} color={'green'} /> : ''}

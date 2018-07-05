@@ -6,6 +6,8 @@ import pilot from '../modules/pilot/pilot.reducer'
 import user from '../modules/login/login.reducer'
 import signup from '../modules/signup/signup.reducer'
 import users from '../modules/users/users.reducer'
+import lso from '../modules/lso/lso.reducer'
+import training from '../modules/training/training.reducer'
 
 export default combineReducers({
   layout,
@@ -14,5 +16,7 @@ export default combineReducers({
   user,
   signup,
   users,
+  lso,
+  training,
   form: formReducer,
 })
