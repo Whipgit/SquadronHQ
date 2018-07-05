@@ -67,13 +67,27 @@ const MainLayout = ({
               </Menu.Item>
             </Link>
             <Menu.Item href={'http://vcvw-11.freeforums.net/'}>Forum</Menu.Item>
-            {layout.squadrons.map((squadron, key) => {
-              return (
-                <Menu.Item key={key}>
-                  <Link to={`/squadron/${squadron.fields.squadronId}`}>{squadron.fields.squadronId}</Link>
-                </Menu.Item>
-              )
-            })}
+            <Menu.Item>
+              <Dropdown text={'Squadrons'}>
+                <Dropdown.Menu>
+                  {layout.squadrons.map((squadron, key) => {
+                    return (
+                      <Dropdown.Item key={key}>
+                        <MenuGrid>
+                          <Image src={`${squadron.fields.squadronLogo.fields.file.url}`} height={30} />
+                          <Link
+                            style={{ color: '#000' }}
+                            to={`/squadron/${squadron.fields.squadronId}`}
+                          >
+                            {squadron.fields.squadronId}
+                          </Link>
+                        </MenuGrid>
+                      </Dropdown.Item>
+                    )
+                  })}
+                </Dropdown.Menu>
+              </Dropdown>
+            </Menu.Item>
             {authenticated ? (
               <Menu.Item position={'right'}>
                 <Dropdown text={callsign}>
@@ -196,6 +210,15 @@ const ChildContainer = styled.div`
   padding-bottom: 200px;
   padding-top: 130px;
   min-height: 768px;
+`
+
+const MenuGrid = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: stretch;
 `
 
 const MainLayoutWrapper = ({ data, layout, ...rest }) => {
