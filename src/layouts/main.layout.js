@@ -72,17 +72,14 @@ const MainLayout = ({
                 <Dropdown.Menu>
                   {layout.squadrons.map((squadron, key) => {
                     return (
-                      <Dropdown.Item key={key}>
-                        <MenuGrid>
-                          <Image src={`${squadron.fields.squadronLogo.fields.file.url}`} height={30} />
-                          <Link
-                            style={{ color: '#000' }}
-                            to={`/squadron/${squadron.fields.squadronId}`}
-                          >
-                            {squadron.fields.squadronId}
-                          </Link>
-                        </MenuGrid>
-                      </Dropdown.Item>
+                      <Link to={`/squadron/${squadron.fields.squadronId}`}>
+                        <Dropdown.Item key={key} style={{ color: '#000' }}>
+                          <MenuGrid>
+                            <Image src={`${squadron.fields.squadronLogo.fields.file.url}`} width={25} />
+                            <div>{squadron.fields.squadronId}</div>
+                          </MenuGrid>
+                        </Dropdown.Item>
+                      </Link>
                     )
                   })}
                 </Dropdown.Menu>
@@ -213,12 +210,12 @@ const ChildContainer = styled.div`
 `
 
 const MenuGrid = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  grid-column-gap: 10px;
+  grid-row-gap: 5px;
+  justify-items: stretch;
   align-items: center;
-  align-content: stretch;
 `
 
 const MainLayoutWrapper = ({ data, layout, ...rest }) => {
