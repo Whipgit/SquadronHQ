@@ -2,16 +2,56 @@ import React from 'react'
 import { Helmet } from 'react-helmet'
 import { connect } from 'react-redux'
 import { compose, lifecycle } from 'recompose'
-import { Dimmer, Loader, Tab, Segment, Grid, Form, Search, Label, Dropdown, Button } from 'semantic-ui-react'
+import {
+  Dimmer,
+  Loader,
+  Tab,
+  Segment,
+  Grid,
+  Form,
+  Search,
+  Label,
+  Dropdown,
+  Button,
+  Popup,
+  Icon,
+  Table,
+} from 'semantic-ui-react'
 import { Field, reduxForm } from 'redux-form'
 import DatePicker from 'react-datepicker'
-import moment from 'moment'
+import * as moment from 'moment'
 import styled from 'styled-components'
 
 import 'react-datepicker/dist/react-datepicker.css'
 
-import { fetchPilotsList, trimPilot, resetPilot, trimLso, resetLso } from './lso.reducer'
+import {
+  fetchPilotsList,
+  trimPilot,
+  resetPilot,
+  trimLso,
+  resetLso,
+  saveTrap,
+  fetchLatestTraps,
+  deleteTrap,
+} from './lso.reducer'
+import trapnote from '../../utils/trapnote'
 
+const prestine = ({
+  dateField,
+  pilotField,
+  lsoField,
+  airframeField,
+  gradeField,
+  awField,
+  xField,
+  imField,
+  icField,
+  lineDeviationAField,
+  lineDeviationBField,
+  wiresField,
+}) => {
+  return !dateField || !pilotField || !lsoField || !airframeField || !gradeField
+}
 const RenderDatePicker = ({ input, placeholder, defaultValue, meta: { touched, error } }) => (
   <div>
     <DatePicker {...input} dateForm="MM/DD/YYYY" selected={input.value ? moment(input.value) : null} />
@@ -30,7 +70,7 @@ const RenderDropdown = ({ input, placeholder, options, defaultValue, meta: { tou
       onChange={(e, data) => {
         input.onChange(data.value)
       }}
-      fluid
+      fluid={true}
     />
     {touched && error && <span>{error}</span>}
   </div>
@@ -68,7 +108,7 @@ const Users = ({ users, data }) => {
           <InnerContainer>
             <H1>LSO Platform</H1>
             <Segment>
-              <LSOTabs />
+              <LSOTabsConnected />
             </Segment>
           </InnerContainer>
         ),
@@ -86,12 +126,76 @@ const panes = [
       </Tab.Pane>
     ),
   },
-  { menuItem: 'Remove a Trap', render: () => <Tab.Pane>Tab 2 Content</Tab.Pane> },
+  { menuItem: 'Remove a Trap', render: () => <LatestTrapsSheetConnected /> },
 ]
 
-const LSOTabs = () => <Tab panes={panes} />
+const LatestTrapsSheet = ({ removeTab, deleteTrap }) =>
+  removeTab.cata({
+    Loading: () => <Tab.Pane loading />,
+    Data: data => (
+      <Tab.Pane>
+        <Table celled>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell width={2}>Trap Date</Table.HeaderCell>
+              <Table.HeaderCell width={1}>Pilot</Table.HeaderCell>
+              <Table.HeaderCell width={1}>LSO</Table.HeaderCell>
+              <Table.HeaderCell width={3}>Notes</Table.HeaderCell>
+              <Table.HeaderCell width={1}>Action</Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
 
-const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => {
+          <Table.Body>
+            {data.map(trap => (
+              <Table.Row positive={trap.grade === 4} warning={trap.grade === 2.5} negative={trap.grade <= 2}>
+                <Table.Cell>{moment(trap.trapDate).format('ddd, MMMM Do YYYY')}</Table.Cell>
+                <Table.Cell>{trap.pilot}</Table.Cell>
+                <Table.Cell>{trap.lso}</Table.Cell>
+                <Table.Cell>{trapnote(trap)}</Table.Cell>
+                <Table.Cell>
+                  <Button onClick={() => deleteTrap(trap.id)}>x</Button>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+      </Tab.Pane>
+    ),
+  })
+
+const LatestTrapsSheetConnected = connect(state => ({ removeTab: state.lso.removeTab }), { deleteTrap })(
+  LatestTrapsSheet
+)
+
+const LSOTabs = ({ fetchLatestTraps }) => <Tab panes={panes} onTabChange={() => fetchLatestTraps()} />
+
+const LSOTabsConnected = connect(state => ({}), {
+  fetchLatestTraps,
+})(LSOTabs)
+
+const EnterTrap = ({
+  reset,
+  pilot,
+  trimPilot,
+  resetPilot,
+  lso,
+  trimLso,
+  resetLso,
+  dateField,
+  pilotField,
+  lsoField,
+  airframeField,
+  gradeField,
+  awField,
+  xField,
+  imField,
+  icField,
+  lineDeviationAField,
+  lineDeviationBField,
+  wiresField,
+  spinner,
+  saveTrap,
+}) => {
   return (
     <React.Fragment>
       <Form onSubmit={() => {}}>
@@ -101,7 +205,7 @@ const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => 
               <div>
                 <label>Trap Date</label>
                 <div>
-                  <StyledField component={RenderDatePicker} name="trapDate" required />
+                  <StyledField component={RenderDatePicker} name="date" required />
                 </div>
               </div>
             </Grid.Column>
@@ -151,7 +255,7 @@ const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => 
             </Grid.Column>
             <Grid.Column width={2}>
               <div>
-                <label>Grade</label>
+                <label style={{ paddingRight: '5px' }}>Grade</label>
                 <div>
                   <StyledField
                     component={RenderDropdown}
@@ -174,103 +278,81 @@ const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => 
           </Grid.Row>
           <Grid.Row>
             <LsoTitle>Glidescope & Speed Errors</LsoTitle>
-            <Grid.Column width={4}>
+            <Grid.Column width={3}>
               <div>
                 <label>AW</label>
+                <Popup
+                  trigger={<Iconer name={'question circle'} />}
+                  content={
+                    'AW- All the Way - used for constant deviation through entire glideslope. AFU- All Fouled Up - multiple deviations too numerous to write down within form constraints.'
+                  }
+                />
                 <div>
                   <StyledField
                     component={RenderDropdown}
                     name="glideAW"
                     required
-                    options={speedOptions}
+                    options={aw}
                     selection
                     scrolling
+                    floating
                   />
                 </div>
               </div>
             </Grid.Column>
-            <Grid.Column width={4}>
-              <div>
-                <label>OT</label>
-                <div>
-                  <StyledField
-                    component={RenderDropdown}
-                    name="glideOT"
-                    required
-                    options={speedOptions}
-                    selection
-                    scrolling
-                  />
-                </div>
-              </div>
-            </Grid.Column>
-            <Grid.Column width={4}>
+            <Grid.Column width={3}>
               <div>
                 <label>X</label>
+                <Popup
+                  trigger={<Iconer name={'question circle'} />}
+                  content={'X - At the start - The first 1/3 of the glideslope'}
+                />
                 <div>
-                  <StyledField
-                    component={RenderDropdown}
-                    name="glideX"
-                    required
-                    options={speedOptions}
-                    selection
-                    scrolling
-                  />
+                  <StyledField component={RenderDropdown} name="glideX" required options={x} selection scrolling />
                 </div>
               </div>
             </Grid.Column>
-            <Grid.Column width={4}>
+            <Grid.Column width={3}>
               <div>
                 <label>IM</label>
+                <Popup
+                  trigger={<Iconer name={'question circle'} />}
+                  content={'IM - In the Middle - The second 2/3 of the glideslope'}
+                />
                 <div>
-                  <StyledField
-                    component={RenderDropdown}
-                    name="glideIM"
-                    required
-                    options={speedOptions}
-                    selection
-                    scrolling
-                  />
+                  <StyledField component={RenderDropdown} name="glideIM" required options={im} selection scrolling />
+                </div>
+              </div>
+            </Grid.Column>
+            <Grid.Column width={3}>
+              <div>
+                <label>IC</label>
+                <Popup
+                  trigger={<Iconer name={'question circle'} />}
+                  content={'IC - In Close - The last 3/3 of the glideslope'}
+                />
+                <div>
+                  <StyledField component={RenderDropdown} name="glideIC" required options={ic} selection scrolling />
+                </div>
+              </div>
+            </Grid.Column>
+            <Grid.Column width={3}>
+              <div>
+                <label>AR</label>
+                <Popup trigger={<Iconer name={'question circle'} />} content={'AR - At the Ramp'} />
+                <div>
+                  <StyledField component={RenderDropdown} name="glideAR" required options={ar} selection scrolling />
                 </div>
               </div>
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
-            <LsoTitle>Control Errors</LsoTitle>
+            <LsoTitle>
+              At Ramp - To Landing
+              <Popup trigger={<Iconer name={'question circle'} />} content={'State in which the aircraft landed'} />
+              <Small>* Optional with 2 LSO on duty one with a clear view not in PLAT view</Small>
+            </LsoTitle>
             <Grid.Column width={8}>
-              <div>
-                <label>Power</label>
-                <div>
-                  <StyledField
-                    component={RenderDropdown}
-                    name="controlPower"
-                    required
-                    options={controlOptions}
-                    selection
-                    scrolling
-                  />
-                </div>
-              </div>
-            </Grid.Column>
-            <Grid.Column width={8}>
-              <div>
-                <label>Attitude</label>
-                <div>
-                  <StyledField
-                    component={RenderDropdown}
-                    name="controlAttitude"
-                    required
-                    options={attitudeOptions}
-                    selection
-                    scrolling
-                  />
-                </div>
-              </div>
-            </Grid.Column>
-          </Grid.Row>
-          <Grid.Row>
-            <LsoTitle>Lineup & Landing</LsoTitle>
-            <Grid.Column width={5}>
               <div>
                 <label>Deviation</label>
                 <div>
@@ -285,7 +367,7 @@ const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => 
                 </div>
               </div>
             </Grid.Column>
-            <Grid.Column width={5}>
+            <Grid.Column width={8}>
               <div>
                 <label>Deviation</label>
                 <div>
@@ -294,21 +376,6 @@ const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => 
                     name="lineDeviationB"
                     required
                     options={deviationOptions}
-                    selection
-                    scrolling
-                  />
-                </div>
-              </div>
-            </Grid.Column>
-            <Grid.Column width={6}>
-              <div>
-                <label>Location</label>
-                <div>
-                  <StyledField
-                    component={RenderDropdown}
-                    name="lineLocation"
-                    required
-                    options={locationOptions}
                     selection
                     scrolling
                   />
@@ -336,7 +403,43 @@ const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => 
           </Grid.Row>
           <Grid.Row width={12}>
             <Grid.Column>
-              <Button fluid size="large" type={'submit'}>
+              <Button
+                loading={spinner}
+                fluid
+                size="large"
+                type={'submit'}
+                disabled={prestine({
+                  dateField,
+                  pilotField,
+                  lsoField,
+                  airframeField,
+                  gradeField,
+                  awField,
+                  xField,
+                  imField,
+                  icField,
+                  lineDeviationAField,
+                  lineDeviationBField,
+                  wiresField,
+                })}
+                onClick={() =>
+                  saveTrap({
+                    dateField,
+                    pilotField,
+                    lsoField,
+                    airframeField,
+                    gradeField,
+                    awField,
+                    xField,
+                    imField,
+                    icField,
+                    lineDeviationAField,
+                    lineDeviationBField,
+                    wiresField,
+                    reset,
+                  })
+                }
+              >
                 SUBMIT TRAP
               </Button>
             </Grid.Column>
@@ -347,12 +450,32 @@ const EnterTrap = ({ pilot, trimPilot, resetPilot, lso, trimLso, resetLso }) => 
   )
 }
 
-const EnterTrapConnected = connect(state => ({ pilot: state.lso.pilot, lso: state.lso.lso }), {
-  trimPilot,
-  resetPilot,
-  trimLso,
-  resetLso,
-})(EnterTrap)
+const EnterTrapConnected = connect(
+  state => ({
+    spinner: state.lso.spinner,
+    pilot: state.lso.pilot,
+    lso: state.lso.lso,
+    dateField: state.form.lso && state.form.lso.values && state.form.lso.values.date,
+    pilotField: state.form.lso && state.form.lso.values && state.form.lso.values.pilot,
+    lsoField: state.form.lso && state.form.lso.values && state.form.lso.values.lso,
+    airframeField: state.form.lso && state.form.lso.values && state.form.lso.values.airframe,
+    gradeField: state.form.lso && state.form.lso.values && state.form.lso.values.grade,
+    awField: state.form.lso && state.form.lso.values && state.form.lso.values.glideAW,
+    xField: state.form.lso && state.form.lso.values && state.form.lso.values.glideX,
+    imField: state.form.lso && state.form.lso.values && state.form.lso.values.glideIM,
+    icField: state.form.lso && state.form.lso.values && state.form.lso.values.glideIC,
+    lineDeviationAField: state.form.lso && state.form.lso.values && state.form.lso.values.lineDeviationA,
+    lineDeviationBField: state.form.lso && state.form.lso.values && state.form.lso.values.lineDeviationB,
+    wiresField: state.form.lso && state.form.lso.values && state.form.lso.values.wiresField,
+  }),
+  {
+    trimPilot,
+    resetPilot,
+    trimLso,
+    resetLso,
+    saveTrap,
+  }
+)(EnterTrap)
 
 const EnterTrapSheet = reduxForm({
   // a unique name for the form
@@ -377,6 +500,10 @@ const enhance = compose(
     },
   })
 )
+const Small = styled.div`
+  font-size: 8px;
+  margin-top: -5px;
+`
 
 const enhancedComponent = enhance(Users)
 
@@ -409,81 +536,180 @@ const LsoTitle = styled.p`
   top: 3px;
   font-weight: bold;
 `
+const Iconer = styled(Icon)`
+  margin-left: 3px !important;
+`
 
-const speedOptions = [
-  { text: 'AFU', value: 'AFU' },
-  { text: 'B', value: 'B' },
-  { text: 'DR', value: 'DR' },
-  { text: 'F', value: 'F' },
-  { text: 'FD', value: 'FD' },
-  { text: 'H', value: 'H' },
-  { text: 'LIG', value: 'LIG' },
-  { text: 'NEP', value: 'NEP' },
-  { text: 'NERD', value: 'NERD' },
-  { text: 'NESA', value: 'NESA' },
-  { text: 'NSU', value: 'NH' },
-  { text: 'P', value: 'P' },
-  { text: 'S', value: 'S' },
-  { text: 'SD', value: 'SD' },
-  { text: 'SLO', value: 'SLO' },
-  { text: 'ST', value: 'ST' },
-  { text: 'TCA', value: 'TCA' },
-  { text: 'TMP', value: 'TMP' },
-  { text: 'TMRD', value: 'TMRD' },
-  { text: 'TTL', value: 'TTL' },
-  { text: 'TWA', value: 'TWA' },
+const aw = [
+  { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: 'All Fouled Up', value: 'AFU' },
+  { text: 'Fast', value: 'F' },
+  { text: '(Fast)', value: '(F)' },
+  { text: 'Slow', value: 'SLO' },
+  { text: '(Slow)', value: '(SLO)' },
+  { text: 'High', value: 'H' },
+  { text: '(High)', value: '(H)' },
+  { text: 'Low', value: 'LO' },
+  { text: '(Low)', value: '(LO)' },
+  { text: 'Lined Up Left', value: 'LUL' },
+  { text: '(Lined Up Left)', value: '(LUL)' },
+  { text: 'Lined Up Right', value: 'LUR' },
+  { text: '(Lined Up Right)', value: '(LUR)' },
+  { text: 'No Hook', value: 'NH' },
+  { text: 'Pitching Deck, special indication only when authorized in briefing', value: 'PD' },
+  { text: 'Rough, constant up/down on the glideslope', value: 'RUF' },
+  { text: 'Long In Groove - Waveoff', value: 'LIG' },
 ]
 
-const controlOptions = [
-  { text: 'ACC', value: 'ACC' },
-  { text: 'B', value: 'B' },
-  { text: 'GLI', value: 'GLI' },
-  { text: 'H', value: 'H' },
-  { text: 'LO', value: 'LO' },
-  { text: 'NEP', value: 'NEP' },
-  { text: 'S', value: 'S' },
-  { text: 'SRD', value: 'SRD' },
-  { text: 'TMP', value: 'TMP' },
+const x = [
+  { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: 'Fast', value: 'F' },
+  { text: '(Fast)', value: '(F)' },
+  { text: 'Slow', value: 'SLO' },
+  { text: '(Slow)', value: '(SLO)' },
+  { text: 'High', value: 'H' },
+  { text: '(High)', value: '(H)' },
+  { text: 'Low', value: 'LO' },
+  { text: '(Low)', value: '(LO)' },
+  { text: 'Lined Up Left', value: 'LUL' },
+  { text: '(Lined Up Left)', value: '(LUL)' },
+  { text: 'Lined Up Right', value: 'LUR' },
+  { text: '(Lined Up Right)', value: '(LUR)' },
+  { text: 'Drifted Left', value: 'DL' },
+  { text: '(Drifted Left)', value: '(DL)' },
+  { text: 'Drifted Right', value: 'DR' },
+  { text: '(Drifted Right)', value: '(DR)' },
+  { text: 'Overshoot lineup (once)', value: 'OS' },
+  { text: 'Overshoot lineup (++1)', value: 'OSCB' },
+  { text: 'Too Much Power', value: 'TMP' },
+  { text: '(Too Much Power)', value: '(TMP)' },
+  { text: 'Not Enough Power', value: 'NEP' },
+  { text: '(Not Enough Power)', value: '(NEP)' },
+  { text: 'Rolled in too close to the boat, closer than ¾ mile', value: 'NESA' },
+  { text: 'Not Enough Rate of Descent', value: 'NERD' },
+  { text: 'Pulled Nose Up', value: 'PNU' },
+  { text: '(Pulled Nose Up)', value: '(PNU)' },
+  { text: 'Dropped Nose', value: 'DN' },
+  { text: '(Dropped Nose)', value: '(DN)' },
+  { text: 'Pilot Waved Off', value: 'OWO' },
+  { text: 'LSO Waved Off', value: 'WO' },
 ]
 
-const attitudeOptions = [
-  { text: 'ND', value: 'ND' },
-  { text: 'NEA', value: 'NEA' },
-  { text: 'OR', value: 'OR' },
-  { text: 'PNU', value: 'PNU' },
-  { text: 'SKD', value: 'SKD' },
-  { text: 'ST', value: 'ST' },
-  { text: 'XCTL', value: 'XCTL' },
+const im = [
+  { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: 'Late Lineup', value: 'LLU' },
+  { text: '(Late Lineup)', value: '(LLU)' },
+  { text: 'Fast', value: 'F' },
+  { text: '(Fast)', value: '(F)' },
+  { text: 'Slow', value: 'SLO' },
+  { text: '(Slow)', value: '(SLO)' },
+  { text: 'High', value: 'H' },
+  { text: '(High)', value: '(H)' },
+  { text: 'Low', value: 'LO' },
+  { text: '(Low)', value: '(LO)' },
+  { text: 'Lined Up Left', value: 'LUL' },
+  { text: '(Lined Up Left)', value: '(LUL)' },
+  { text: 'Lined Up Right', value: 'LUR' },
+  { text: '(Lined Up Right)', value: '(LUR)' },
+  { text: 'Drifted Left', value: 'DL' },
+  { text: '(Drifted Left)', value: '(DL)' },
+  { text: 'Drifted Right', value: 'DR' },
+  { text: '(Drifted Right)', value: '(DR)' },
+  { text: 'Overshoot lineup (once)', value: 'OS' },
+  { text: 'Overshoot lineup (++1)', value: 'OSCB' },
+  { text: 'Too Much Power', value: 'TMP' },
+  { text: '(Too Much Power)', value: '(TMP)' },
+  { text: 'Not Enough Power', value: 'NEP' },
+  { text: '(Not Enough Power)', value: '(NEP)' },
+  { text: 'Rolled in too close to the boat, closer than ¾ mile', value: 'NESA' },
+  { text: 'Not Enough Rate of Descent', value: 'NERD' },
+  { text: 'Pulled Nose Up', value: 'PNU' },
+  { text: '(Pulled Nose Up)', value: '(PNU)' },
+  { text: 'Dropped Nose', value: 'DN' },
+  { text: '(Dropped Nose)', value: '(DN)' },
+  { text: 'Pilot Waved Off', value: 'OWO' },
+  { text: 'LSO Waved Off', value: 'WO' },
+]
+
+const ic = [
+  { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: 'Fast', value: 'F' },
+  { text: '(Fast)', value: '(F)' },
+  { text: 'Slow', value: 'SLO' },
+  { text: '(Slow)', value: '(SLO)' },
+  { text: 'High', value: 'H' },
+  { text: '(High)', value: '(H)' },
+  { text: 'Low', value: 'LO' },
+  { text: '(Low)', value: '(LO)' },
+  { text: 'Lined Up Left', value: 'LUL' },
+  { text: '(Lined Up Left)', value: '(LUL)' },
+  { text: 'Lined Up Right', value: 'LUR' },
+  { text: '(Lined Up Right)', value: '(LUR)' },
+  { text: 'Drifted Left', value: 'DL' },
+  { text: '(Drifted Left)', value: '(DL)' },
+  { text: 'Drifted Right', value: 'DR' },
+  { text: '(Drifted Right)', value: '(DR)' },
+  { text: 'Overshoot lineup (once)', value: 'OS' },
+  { text: 'Overshoot lineup (++1)', value: 'OSCB' },
+  { text: 'Too Much Power', value: 'TMP' },
+  { text: '(Too Much Power)', value: '(TMP)' },
+  { text: 'Not Enough Power', value: 'NEP' },
+  { text: '(Not Enough Power)', value: '(NEP)' },
+  { text: 'Not Enough Rate of Descent', value: 'NERD' },
+  { text: 'Pulled Nose Up', value: 'PNU' },
+  { text: '(Pulled Nose Up)', value: '(PNU)' },
+  { text: 'Dropped Nose', value: 'DN' },
+  { text: '(Dropped Nose)', value: '(DN)' },
+  { text: 'Pilot Waved Off', value: 'OWO' },
+  { text: 'LSO Waved Off', value: 'WO' },
+]
+
+const ar = [
+  { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: 'Fast', value: 'F' },
+  { text: '(Fast)', value: '(F)' },
+  { text: 'Slow', value: 'SLO' },
+  { text: '(Slow)', value: '(SLO)' },
+  { text: 'High', value: 'H' },
+  { text: '(High)', value: '(H)' },
+  { text: 'Low', value: 'LO' },
+  { text: '(Low)', value: '(LO)' },
+  { text: 'Lined Up Left', value: 'LUL' },
+  { text: '(Lined Up Left)', value: '(LUL)' },
+  { text: 'Lined Up Right', value: 'LUR' },
+  { text: '(Lined Up Right)', value: '(LUR)' },
+  { text: 'Drifted Left', value: 'DL' },
+  { text: '(Drifted Left)', value: '(DL)' },
+  { text: 'Drifted Right', value: 'DR' },
+  { text: '(Drifted Right)', value: '(DR)' },
+  { text: 'Pulled Nose Up', value: 'PNU' },
+  { text: '(Pulled Nose Up)', value: '(PNU)' },
+  { text: 'Dropped Nose', value: 'DN' },
+  { text: '(Dropped Nose)', value: '(DN)' },
+  { text: 'Settled', value: 'S' },
+  { text: '(Settled)', value: '(S)' },
+  { text: 'Pilot Waved Off', value: 'OWO' },
+  { text: 'LSO Waved Off', value: 'WO' },
 ]
 
 const deviationOptions = [
-  { text: 'AA', value: 'AA' },
-  { text: 'DL', value: 'DL' },
-  { text: 'LLU', value: 'LLU' },
-  { text: 'FD', value: 'FD' },
-  { text: 'LL', value: 'LL' },
-  { text: 'LR', value: 'LR' },
-  { text: 'LUL', value: 'LUL' },
-  { text: 'LUR', value: 'LUR' },
-  { text: 'LWD', value: 'LWD' },
-  { text: 'NH', value: 'NH' },
-  { text: 'PNU', value: 'PNU' },
-  { text: 'RWD', value: 'RWD' },
-  { text: 'S', value: 'S' },
-  { text: 'TMRD', value: 'TMRD' },
-  { text: 'LLWD', value: 'LLWD' },
-  { text: 'LRWD', value: 'LRDW' },
-  { text: 'LNF', value: 'LNF' },
-  { text: '3PTS', value: '3PTS' },
+  { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: 'Pulled Nose Up', value: 'PNU' },
+  { text: '(Pulled Nose Up)', value: '(PNU)' },
+  { text: 'Dropped Nose', value: 'DN' },
+  { text: '(Dropped Nose)', value: '(DN)' },
+  { text: 'Landed Left', value: 'LL' },
+  { text: '(Landed Left)', value: '(LL)' },
+  { text: 'Landed Right', value: 'LR' },
+  { text: '(Landed Right)', value: '(LR)' },
+  { text: 'Landed Left Wing Down', value: 'LLWD' },
+  { text: 'Landed Right Wing Down', value: 'LRWD' },
+  { text: 'Landed Nose (severe nose drop)', value: 'LNF' },
+  { text: 'Landed on all 3 landing gear at once', value: '3PTS' },
+  { text: 'Spotted Deck (Did nit look at the ball all the way to wheels down)', value: 'SD' },
 ]
 
-const locationOptions = [
-  { text: 'X', value: 'X' },
-  { text: 'IM', value: 'IM' },
-  { text: 'IC', value: 'IC' },
-  { text: 'AR', value: 'AR' },
-  { text: 'AW', value: 'AW' },
-]
+const locationOptions = [{ text: 'AR', value: 'AR' }, { text: 'AW', value: 'AW' }]
 
 const wires = [
   { text: '1 Wire', value: '1 Wire' },

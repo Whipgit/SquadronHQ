@@ -2,6 +2,7 @@ const dotenv = require('dotenv').config()
 const functions = require('firebase-functions')
 const contentful = require('contentful')
 const { sort } = require('ramda')
+const trapnote = require('./utils/trapnote')
 const firebase = require('firebase/app')
 require('firebase/auth')
 require('firebase/firestore')
@@ -24,6 +25,7 @@ firebase.initializeApp({
 
 const db = firebase.firestore()
 const users = db.collection('users')
+const traps = db.collection('traps')
 const auth = firebase.auth()
 
 exports.login = functions.https.onRequest((req, res) => {
@@ -108,11 +110,53 @@ exports.squadron = functions.https.onRequest((req, res) => {
   })
 })
 
+exports.greenie = functions.https.onRequest((req, res) => {
+  res.set('Access-Control-Allow-Origin', req.get('Origin'))
+  res.set('Access-Control-Allow-Credentials', true)
+  res.set('Access-Control-Allow-Methods', 'GET')
+  const greenieLength = req.query.length || 20
+  return client
+    .getEntries({ content_type: 'squadrons', 'fields.squadronId': req.query.squadronId })
+    .then(response => {
+      const pilotsArray = response.items[0].fields.pilots.map(({ fields }) => fields.callsign)
+      return Promise.all(
+        pilotsArray.map(pilot =>
+          traps
+            .where('pilot', '==', pilot)
+            .orderBy('date', 'asc')
+            .limit(20)
+            .get()
+            .then(traps => {
+              const trapsArray = []
+              traps.forEach(trap => {
+                const data = trap.data()
+                trapsArray.push({
+                  grade: data.grade,
+                  trapDate: data.date,
+                  lsoNotes: trapnote(data),
+                })
+              })
+              const length = trapsArray.length
+              if (length < greenieLength) {
+                for (let i = length; i < greenieLength; i++) {
+                  trapsArray.push({ grade: '' })
+                }
+              }
+              return { callsign: pilot, traps: trapsArray }
+            })
+        )
+      )
+    })
+    .then(response => res.send(response))
+    .catch(err => res.send(err))
+})
+
 exports.pilot = functions.https.onRequest((req, res) => {
   res.set('Access-Control-Allow-Origin', req.get('Origin'))
   res.set('Access-Control-Allow-Credentials', true)
   res.set('Access-Control-Allow-Methods', 'GET')
   let pilot = {}
+  let pilotId
   let trainingEvents = {
     a: [],
     b: [],
@@ -123,6 +167,7 @@ exports.pilot = functions.https.onRequest((req, res) => {
     .getEntries({ content_type: 'pilots', 'fields.callsign': req.query.callsign })
     .then(response => {
       pilot = (response && response.items && response.items[0] && response.items[0].fields) || 'error'
+      pilotId = (response && response.items && response.items[0] && response.items[0].sys.id) || 'error'
       return client.getEntries({ content_type: 'trainingEvents' })
     })
     .then(allTraining => {
@@ -148,6 +193,7 @@ exports.pilot = functions.https.onRequest((req, res) => {
       trainingEvents.d = sort(diffTraining, trainingEvents.d)
       delete pilot.training
       pilot.training = trainingEvents
+      pilot.id = pilotId
       res.send(pilot)
     })
 })

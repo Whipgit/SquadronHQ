@@ -6,6 +6,7 @@ import { compose, lifecycle } from 'recompose'
 import { Table, Icon, Divider, Statistic } from 'semantic-ui-react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import styled from 'styled-components'
+import Auth from './Auth'
 
 import { fetchPilotData } from './pilot.reducer'
 
@@ -16,12 +17,17 @@ import lcdr from '../../assets/US-O4_insignia.svg'
 import cdr from '../../assets/US-O5_insignia.svg'
 import capt from '../../assets/US-O6_insignia.svg'
 
+const getRank = str => (str.includes('USMC') ? str.replace('USMC - ', '') : str)
+
 const Pilot = ({
   match: {
     params: { callsign },
   },
   pilot,
   data,
+  authenticated,
+  isFullMember,
+  isTrainee,
 }) => {
   return (
     <PilotContainer>
@@ -33,9 +39,11 @@ const Pilot = ({
         Data: () => (
           <InnerContainer>
             <H2>
-              {pilot.firstName} "{pilot.callsign}" {pilot.familyName}
+              {isFullMember || isTrainee
+                ? `${pilot.firstName} "${pilot.callsign}" ${pilot.familyName}`
+                : pilot.callsign}
             </H2>
-            <H4>{pilot.rank}</H4>
+            <H4>{getRank(pilot.rank)}</H4>
             <Divider />
 
             <Statistic.Group widths="four">
@@ -73,7 +81,11 @@ const Pilot = ({
                       {item.code}
                     </Table.Cell>
                     <Table.Cell width={4}>
-                      <Link to={`/training/${item.code}`}>{item.title}</Link>
+                      {authenticated && (isTrainee || isFullMember) ? (
+                        <Link to={`/training/${item.code}`}>{item.title}</Link>
+                      ) : (
+                        item.title
+                      )}
                     </Table.Cell>
                     <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
                     <Table.Cell width={1} textAlign={'center'}>
@@ -90,20 +102,28 @@ const Pilot = ({
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {pilot.training.c.map(item => (
+                {authenticated && isFullMember ? (
+                  pilot.training.c.map(item => (
+                    <Table.Row>
+                      <Table.Cell width={2} textAlign={'center'}>
+                        {item.code}
+                      </Table.Cell>
+                      <Table.Cell width={4}>
+                        <Link to={`/training/${item.code}`}>{item.title}</Link>
+                      </Table.Cell>
+                      <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
+                      <Table.Cell width={1} textAlign={'center'}>
+                        {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))
+                ) : (
                   <Table.Row>
-                    <Table.Cell width={2} textAlign={'center'}>
-                      {item.code}
-                    </Table.Cell>
-                    <Table.Cell width={4}>
-                      <Link to={`/training/${item.code}`}>{item.title}</Link>
-                    </Table.Cell>
-                    <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
-                    <Table.Cell width={1} textAlign={'center'}>
-                      {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
+                    <Table.Cell width={2} textAlign={'left'}>
+                      You must be a full member to view C-CAT material
                     </Table.Cell>
                   </Table.Row>
-                ))}
+                )}
               </Table.Body>
             </Table>
             <Table celled>
@@ -113,20 +133,28 @@ const Pilot = ({
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {pilot.training.b.map(item => (
+                {authenticated && isFullMember ? (
+                  pilot.training.b.map(item => (
+                    <Table.Row>
+                      <Table.Cell width={2} textAlign={'center'}>
+                        {item.code}
+                      </Table.Cell>
+                      <Table.Cell width={4}>
+                        <Link to={`/training/${item.code}`}>{item.title}</Link>
+                      </Table.Cell>
+                      <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
+                      <Table.Cell width={1} textAlign={'center'}>
+                        {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))
+                ) : (
                   <Table.Row>
-                    <Table.Cell width={2} textAlign={'center'}>
-                      {item.code}
-                    </Table.Cell>
-                    <Table.Cell width={4}>
-                      <Link to={`/training/${item.code}`}>{item.title}</Link>
-                    </Table.Cell>
-                    <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
-                    <Table.Cell width={1} textAlign={'center'}>
-                      {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
+                    <Table.Cell width={2} textAlign={'left'}>
+                      You must be a full member to view B-CAT material
                     </Table.Cell>
                   </Table.Row>
-                ))}
+                )}
               </Table.Body>
             </Table>
             <Table celled>
@@ -136,20 +164,28 @@ const Pilot = ({
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {pilot.training.a.map(item => (
+                {authenticated && isFullMember ? (
+                  pilot.training.a.map(item => (
+                    <Table.Row>
+                      <Table.Cell width={2} textAlign={'center'}>
+                        {item.code}
+                      </Table.Cell>
+                      <Table.Cell width={4}>
+                        <Link to={`/training/${item.code}`}>{item.title}</Link>
+                      </Table.Cell>
+                      <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
+                      <Table.Cell width={1} textAlign={'center'}>
+                        {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
+                      </Table.Cell>
+                    </Table.Row>
+                  ))
+                ) : (
                   <Table.Row>
-                    <Table.Cell width={2} textAlign={'center'}>
-                      {item.code}
-                    </Table.Cell>
-                    <Table.Cell width={4}>
-                      <Link to={`/training/${item.code}`}>{item.title}</Link>
-                    </Table.Cell>
-                    <Table.Cell width={9}>{item.shortDescription}</Table.Cell>
-                    <Table.Cell width={1} textAlign={'center'}>
-                      {item.earned ? <Icon name={'check'} color={'green'} /> : ''}
+                    <Table.Cell width={2} textAlign={'left'}>
+                      You must be a full member to view A-CAT material
                     </Table.Cell>
                   </Table.Row>
-                ))}
+                )}
               </Table.Body>
             </Table>
           </InnerContainer>
@@ -193,7 +229,14 @@ const enhance = compose(
 const enhancedComponent = enhance(Pilot)
 
 export default connect(
-  state => ({ data: state.pilot.data, pilot: state.pilot.pilot, curPilot: state.pilot.pilot.callsign }),
+  state => ({
+    data: state.pilot.data,
+    pilot: state.pilot.pilot,
+    curPilot: state.pilot.pilot.callsign,
+    authenticated: state.user.authenticated,
+    isTrainee: state.user.isTrainee,
+    isFullMember: state.user.isFullMember,
+  }),
   { fetchPilotData }
 )(enhancedComponent)
 

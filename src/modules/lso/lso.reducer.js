@@ -9,6 +9,11 @@ const UsersData = daggy.taggedSum('UsersData', {
   Error: ['error'],
 })
 
+const LatestTraps = daggy.taggedSum('UsersData', {
+  Loading: [],
+  Data: ['data'],
+})
+
 export const types = {
   fetchPilotsList: 'FETCH_PILOTS_LIST',
   fetchPilotsListSuccess: 'FETCH_PILOTS_LIST_SUCCESS',
@@ -17,6 +22,11 @@ export const types = {
   trimLso: 'TRIM_LSO_SEARCH',
   resetLso: 'RESET_LSO_SEARCH',
   saveUserPermissions: 'SAVE_USER_PERMISSIONS',
+  saveTrap: 'SAVE_TRAP',
+  trapSaved: 'TRAP_SAVED',
+  fetchLatestTraps: 'FETCH_LATEST_TRAPS',
+  renderLatestTraps: 'RENDER_LATEST_TRAPS',
+  deleteTrap: 'DELETE_TRAP',
 }
 
 export const fetchPilotsList = createAction(types.fetchPilotsList)
@@ -26,12 +36,20 @@ export const resetPilot = createAction(types.resetPilot)
 export const trimLso = createAction(types.trimLso)
 export const resetLso = createAction(types.resetLso)
 export const saveUserPermissions = createAction(types.saveUserPermissions)
+export const saveTrap = createAction(types.saveTrap)
+export const trapSaved = createAction(types.trapSaved)
+export const fetchLatestTraps = createAction(types.fetchLatestTraps)
+export const renderLatestTraps = createAction(types.renderLatestTraps)
+export const deleteTrap = createAction(types.deleteTrap)
 
 export const INITIAL_STATE = {
   data: UsersData.Empty,
   pilotList: [],
   pilot: [],
   lso: [],
+  spinner: false,
+  removeTab: LatestTraps.Loading,
+  traps: [],
 }
 
 export default handleActions(
@@ -79,15 +97,37 @@ export default handleActions(
         lso: [...state.pilotList],
       }
     },
-    [types.saveUserPermissions]: (state, { payload: { user, field, val } }) => {
+    [types.saveTrap]: (state, { payload }) => {
       return {
         ...state,
-        users: state.users.map(account => {
-          if (account.email === user.email) {
-            account[field] = val
-          }
-          return account
-        }),
+        spinner: true,
+      }
+    },
+    [types.trapSaved]: (state, { payload }) => {
+      return {
+        ...state,
+        spinner: false,
+      }
+    },
+    [types.fetchLatestTraps]: (state, { payload }) => {
+      return {
+        ...state,
+        traps: [],
+        removeTab: LatestTraps.Loading,
+      }
+    },
+    [types.renderLatestTraps]: (state, { payload }) => {
+      return {
+        ...state,
+        traps: payload,
+        removeTab: LatestTraps.Data(payload),
+      }
+    },
+    [types.deleteTrap]: (state, { payload }) => {
+      return {
+        ...state,
+        traps: state.traps.filter(trap => trap.id !== payload),
+        removeTab: LatestTraps.Data(state.traps.filter(trap => trap.id !== payload)),
       }
     },
   },

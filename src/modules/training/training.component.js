@@ -8,6 +8,7 @@ import moment from 'moment'
 import { fetchTrainingData } from './training.reducer'
 import showdown from 'showdown'
 import 'showdown-youtube'
+import Auth from './Auth'
 const converter = new showdown.Converter({ extensions: ['youtube'] })
 
 const LoaderComponent = () => (
@@ -20,16 +21,18 @@ const LoaderComponent = () => (
 
 const Training = ({ training, data }) => (
   <React.Fragment>
-    <ImageContainer>
-      {data.cata({
-        Empty: () => <LoaderComponent />,
-        Data: () => (
-          <RosterContainer>
-            <TrainingContent training={training} />
-          </RosterContainer>
-        ),
-      })}
-    </ImageContainer>
+    <Auth>
+      <ImageContainer>
+        {data.cata({
+          Empty: () => <LoaderComponent />,
+          Data: () => (
+            <RosterContainer>
+              <TrainingContent training={training} />
+            </RosterContainer>
+          ),
+        })}
+      </ImageContainer>
+    </Auth>
   </React.Fragment>
 )
 

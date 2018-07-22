@@ -42,7 +42,7 @@ const rankSwitch = rank => {
       return Rank.CDR
     case 'Captain':
       return Rank.CAPT
-    case 'USMC - Second Lieutenant':
+    case 'USMC - Second lieutenant':
       return Rank.MENS
     case 'USMC - First Lieutenant':
       return Rank.MLTJG

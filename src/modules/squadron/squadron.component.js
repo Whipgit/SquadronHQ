@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { compose, lifecycle } from 'recompose'
-import { Header, Table, Icon, Flag, Card } from 'semantic-ui-react'
+import { Header, Table, Icon, Flag, Card, Menu, Grid, Statistic } from 'semantic-ui-react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 import styled from 'styled-components'
 import { Field, reduxForm } from 'redux-form'
@@ -59,14 +59,14 @@ const SquadronDetails = ({ squadron }) => (
   </Card>
 )
 
-const Roster = ({ squadron, data, isFullMember }) => (
+const Roster = ({ squadron, data, isFullMember, isTrainee }) => (
   <React.Fragment>
     <ImageContainer>
       {data.cata({
         Empty: () => <LoaderComponent name={squadron.squadronId} />,
         Data: () => (
           <RosterContainer>
-            <RosterTable squadron={squadron} isFullMember={isFullMember} />
+            <RosterTable squadron={squadron} isFullMember={isFullMember} isTrainee={isTrainee} />
           </RosterContainer>
         ),
       })}
@@ -93,19 +93,53 @@ const RankSvg = ({ rank }) =>
     MCAPT: () => <RankImage src={capt} />,
   })
 
-const RosterTable = ({ squadron, isFullMember }) => (
+const RosterTable = ({ squadron, isFullMember, isTrainee }) => (
   <React.Fragment>
     <Helmet>
       <meta charSet="utf-8" />
       <title>Squadron HQ - {squadron.squadronId}</title>
     </Helmet>
 
-    <GridContainer>
-      <SquadronDetails squadron={squadron} />
-      <ImageWrapper>
-        <SquadronLogo src={`http:${squadron.squadronLogo.file.url}`} />
-      </ImageWrapper>
-    </GridContainer>
+    <Grid>
+      <Grid.Column width={4} verticalAlign={'bottom'}>
+        <SquadronDetails squadron={squadron} />
+      </Grid.Column>
+      <Grid.Column width={8} verticalAlign={'bottom'}>
+        <Grid.Row textAlign={'centered'}>
+          <Statistic>
+            <Statistic.Value>4.5</Statistic.Value>
+            <Statistic.Label>Average Grade</Statistic.Label>
+          </Statistic>
+          <Statistic>
+            <Statistic.Value>15</Statistic.Value>
+            <Statistic.Label>Sorties</Statistic.Label>
+          </Statistic>
+        </Grid.Row>
+        <Grid.Row>
+          <Menu stackable compact>
+            <Menu.Item name="roster" active={true} onClick={this.handleItemClick}>
+              Roster
+            </Menu.Item>
+
+            <Menu.Item name="greenieBoard" active={false} onClick={this.handleItemClick}>
+              Greenie Board
+            </Menu.Item>
+
+            <Menu.Item name="about" active={false} onClick={this.handleItemClick}>
+              About
+            </Menu.Item>
+            <Menu.Item name="sop" active={false} onClick={this.handleItemClick}>
+              S.O.P.
+            </Menu.Item>
+          </Menu>
+        </Grid.Row>
+      </Grid.Column>
+      <Grid.Column width={4} verticalAlign={'centered'}>
+        <ImageWrapper>
+          <SquadronLogo src={`http:${squadron.squadronLogo.file.url}`} />
+        </ImageWrapper>
+      </Grid.Column>
+    </Grid>
 
     <Table celled>
       <Table.Header>
@@ -146,7 +180,7 @@ const RosterTable = ({ squadron, isFullMember }) => (
             </Table.Cell>
             <Table.Cell>
               <Link to={`/pilot/${pilot.callsign}`}>
-                {isFullMember ? `${pilot.firstName} "${pilot.callsign}" ${pilot.familyName}` : pilot.callsign}
+                {isFullMember || isTrainee ? `${pilot.firstName} "${pilot.callsign}" ${pilot.familyName}` : pilot.callsign}
               </Link>
               {pilot.specialRole === 'C.O.' ? (
                 <SubRank>
@@ -266,7 +300,6 @@ const GridContainer = styled.div`
 
 const ImageWrapper = styled.div`
   width: 100%:
-  text-align: right;
 `
 
 const SubRank = styled.p`
@@ -277,12 +310,7 @@ const SubRank = styled.p`
 `
 
 const SquadronLogo = styled.img`
-  display: block;
-  max-width: 200px;
-  max-height: 177px;
-  width: auto;
-  height: auto;
-  float: right;
+  width: 80%;
 `
 
 const enhance = compose(
@@ -309,6 +337,7 @@ export default connect(
     curSquadron: state.squadron.squadron.squadronId,
     authenticated: state.user.authenticated,
     isFullMember: state.user.isFullMember,
+    isTrainee: state.user.isTrainee,
   }),
   {
     fetchSquadronData,
