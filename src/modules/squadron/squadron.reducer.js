@@ -66,14 +66,23 @@ const lso = lso => (lso ? LSO.Check : LSO.Empty)
 export const types = {
   fetchSquadronData: 'FETCH_SQUADRON_DATA',
   fetchSquadronDataSuccess: 'FETCH_SQUADRON_DATA_SUCCESS',
+  fetchGreenieData: 'FETCH_GREENIE_DATA',
+  fetchGreenieDataSuccess: 'FETCH_GREENIE_DATA_SUCCESS',
+  selectTab: 'SELECT_TAB',
 }
 
 export const fetchSquadronData = createAction(types.fetchSquadronData)
 export const fetchSquadronDataSuccess = createAction(types.fetchSquadronDataSuccess)
+export const selectTab = createAction(types.selectTab)
+export const fetchGreenieData = createAction(types.fetchGreenieData)
+export const fetchGreenieDataSuccess = createAction(types.fetchGreenieDataSuccess)
 
 export const INITIAL_STATE = {
   data: RosterData.Empty,
   squadron: {},
+  tabSelected: 'roster',
+  greenieLoading: false,
+  greenieData: [],
 }
 
 export default handleActions(
@@ -82,6 +91,12 @@ export default handleActions(
       return {
         ...state,
         data: RosterData.Empty,
+      }
+    },
+    [types.selectTab]: (state, { payload }) => {
+      return {
+        ...state,
+        tabSelected: payload,
       }
     },
     [types.fetchSquadronDataSuccess]: (state, { payload }) => {
@@ -103,6 +118,19 @@ export default handleActions(
             lsoIcon: lso(pilot.lso),
           })),
         },
+      }
+    },
+    [types.fetchGreenieData]: (state, { payload }) => {
+      return {
+        ...state,
+        greenieLoading: true,
+      }
+    },
+    [types.fetchGreenieDataSuccess]: (state, { payload }) => {
+      return {
+        ...state,
+        greenieLoading: false,
+        greenieData: payload,
       }
     },
   },

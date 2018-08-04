@@ -14,6 +14,24 @@ const client = contentful.createClient({
   accessToken: process.env.ACCESS_TOKEN,
 })
 
+const getAverage = arr => {
+  const filtered = arr.filter(item => item.grade !== '')
+  const average = Math.round(
+    arr.filter(item => item.grade !== '').reduce((a, b) => {
+      if (b.grade !== '') {
+        const grade = b.grade * 100
+        return a + grade
+      } else {
+        return a
+      }
+    }, 0) /
+    100 /
+    filtered.length *
+    100
+  ) / 100
+  return isNaN(average) ? 'N/A' : average
+}
+
 firebase.initializeApp({
   apiKey: 'AIzaSyCInHalJx95WGWPn9oDM4hTIudZHkKiuQI',
   authDomain: 'squadronhq-b1fdd.firebaseapp.com',
@@ -142,7 +160,7 @@ exports.greenie = functions.https.onRequest((req, res) => {
                   trapsArray.push({ grade: '' })
                 }
               }
-              return { callsign: pilot, traps: trapsArray }
+              return { callsign: pilot, traps: trapsArray, average: getAverage(trapsArray) }
             })
         )
       )
@@ -221,3 +239,40 @@ exports.training = functions.https.onRequest((req, res) => {
     .getEntries({ content_type: 'trainingEvents', 'fields.code': req.query.code || 'FAM-2101' })
     .then(response => res.send(response.items[0]))
 })
+
+const greenieLength = 20
+client
+  .getEntries({ content_type: 'squadrons', 'fields.squadronId': 'VF-213' })
+  .then(response => {
+    const pilotsArray = response.items[0].fields.pilots.map(({ fields }) => fields.callsign)
+    return Promise.all(
+      pilotsArray.map(pilot =>
+        traps
+          .where('pilot', '==', pilot)
+          .orderBy('date', 'asc')
+          .limit(20)
+          .get()
+          .then(traps => {
+            const trapsArray = []
+            traps.forEach(trap => {
+              const data = trap.data()
+              trapsArray.push({
+                grade: data.grade,
+                trapDate: data.date,
+                lsoNotes: trapnote(data),
+              })
+            })
+            const length = trapsArray.length
+            if (length < greenieLength) {
+              for (let i = length; i < greenieLength; i++) {
+                trapsArray.push({ grade: '' })
+              }
+            }
+            return { callsign: pilot, traps: trapsArray, average: getAverage(trapsArray) }
+          })
+      )
+    )
+  })
+  .then(response => {
+    debugger
+  })
