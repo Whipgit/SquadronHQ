@@ -352,7 +352,6 @@ const EnterTrap = ({
             <LsoTitle>
               At Ramp - To Landing
               <Popup trigger={<Iconer name={'question circle'} />} content={'State in which the aircraft landed'} />
-              <Small>* Optional with 2 LSO on duty one with a clear view not in PLAT view</Small>
             </LsoTitle>
             <Grid.Column width={8}>
               <div>
@@ -546,6 +545,7 @@ const Iconer = styled(Icon)`
 `
 
 const aw = [
+  { text: '', value: '' },
   { text: 'On Glideslope On Centerline', value: 'OGOC' },
   { text: 'All Fouled Up', value: 'AFU' },
   { text: 'Fast', value: 'F' },
@@ -567,7 +567,7 @@ const aw = [
 ]
 
 const x = [
-  { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: '', value: '' },
   { text: 'Fast', value: 'F' },
   { text: '(Fast)', value: '(F)' },
   { text: 'Slow', value: 'SLO' },
@@ -601,6 +601,7 @@ const x = [
 ]
 
 const im = [
+  { text: '', value: '' },
   { text: 'On Glideslope On Centerline', value: 'OGOC' },
   { text: 'Late Lineup', value: 'LLU' },
   { text: '(Late Lineup)', value: '(LLU)' },
@@ -637,6 +638,7 @@ const im = [
 ]
 
 const ic = [
+  { text: '', value: '' },
   { text: 'On Glideslope On Centerline', value: 'OGOC' },
   { text: 'Fast', value: 'F' },
   { text: '(Fast)', value: '(F)' },
@@ -670,6 +672,7 @@ const ic = [
 ]
 
 const ar = [
+  { text: '', value: '' },
   { text: 'On Glideslope On Centerline', value: 'OGOC' },
   { text: 'Fast', value: 'F' },
   { text: '(Fast)', value: '(F)' },
@@ -698,7 +701,9 @@ const ar = [
 ]
 
 const deviationOptions = [
+  { text: '', value: '' },
   { text: 'On Glideslope On Centerline', value: 'OGOC' },
+  { text: 'Eased Guns to Land', value: 'EGTL' },
   { text: 'Pulled Nose Up', value: 'PNU' },
   { text: '(Pulled Nose Up)', value: '(PNU)' },
   { text: 'Dropped Nose', value: 'DN' },
